@@ -1,0 +1,10 @@
+@import './tailwind.config.css';
+@import './fonts.css';
+
+img,
+button,
+a {
+  user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+}

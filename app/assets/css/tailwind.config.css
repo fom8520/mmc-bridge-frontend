@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@theme static {
+  --font-sans: 'Inter', 'Public Sans', sans-serif;
+
+  --color-primary-50: #faffe5;
+  --color-primary-100: #f3ffc7;
+  --color-primary-200: #e5ff95;
+  --color-primary-300: #cfff55;
+  --color-primary-400: #b9f625;
+  --color-primary-500: #99dd05;
+  --color-primary-600: #76b100;
+  --color-primary-700: #598605;
+  --color-primary-800: #48690b;
+  --color-primary-900: #3c590e;
+  --color-primary-950: #2f3a13;
+  --color-primary: #cfff55;
+}
+
+:root {
+  --ui-bg: var(--color-white);
+  --ui-text: var(--color-black);
+}
+
+.dark {
+  --ui-bg: var(--color-black);
+  --ui-text: var(--color-white);
+}
+
+@layer utilities {
+  .no-drag {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+}
