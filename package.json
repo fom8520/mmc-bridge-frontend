@@ -1,5 +1,7 @@
 {
   "name": "nuxt-app",
+  "displayName": "Nuxt Template",
+  "description": "Nuxt Template",
   "type": "module",
   "private": true,
   "scripts": {

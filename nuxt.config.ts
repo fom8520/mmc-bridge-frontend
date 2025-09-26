@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { displayName, description } from './package.json';
 
 export default defineNuxtConfig({
   devServer: {
@@ -84,6 +85,46 @@ export default defineNuxtConfig({
         arrowParens: false,
       },
       autoInit: false,
+    },
+  },
+  app: {
+    head: {
+      title: displayName,
+      meta: [
+        { charset: 'utf-8' },
+        {
+          name: 'viewport',
+          content:
+            'width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1',
+        },
+        {
+          name: 'apple-mobile-web-app-capable',
+          content: 'yes',
+        },
+        {
+          name: 'apple-mobile-web-app-title',
+          content: displayName,
+        },
+        {
+          name: 'description',
+          content: description,
+        },
+        {
+          name: 'format-detection',
+          content: 'telephone=no',
+        },
+      ],
+      link: [
+        {
+          rel: 'icon',
+          type: 'image/x-icon',
+          href: '/favicon.ico',
+        },
+        {
+          rel: 'apple-touch-icon',
+          href: '/favicon.ico',
+        },
+      ],
     },
   },
 });
