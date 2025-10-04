@@ -14,9 +14,9 @@ export function formatDate(at: number, format = 'YYYY/MM/DD HH:mm:ss') {
 export function shortAddress(address?: string, length: number = 6) {
   if (address == null) return '';
   return (
-    address.substring(0, length) +
-    '...' +
-    address.substring(address.length - length)
+    address.substring(0, length)
+    + '...'
+    + address.substring(address.length - length)
   );
 }
 
@@ -30,9 +30,12 @@ export async function copyText(str: string) {
     if (!navigator.clipboard) throw Error;
     await navigator.clipboard.writeText(str);
   }
+  useToast().add({ description: 'Copied' });
+
   return true;
 }
 
 export function formatAmount(value: string, decimal = 6) {
-  return BigNumber(value).dp(decimal).toFormat();
+  return BigNumber(value).dp(decimal)
+    .toFormat();
 }
