@@ -67,12 +67,22 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/css/main.css'],
   ui: { colorMode: true },
+
   devServer: {
     port: 3185,
     host: '0.0.0.0',
   },
   compatibilityDate: '2025-07-15',
-  nitro: { compressPublicAssets: false },
+  nitro: {
+    compressPublicAssets: false,
+    devProxy: {
+      '/rpc-api/': {
+        target: 'http://222.128.23.254:23134',
+        changeOrigin: true,
+        prependPath: false,
+      },
+    },
+  },
   hooks: {
     'vite:extendConfig'(config, { isClient }) {
       if (isClient) {
