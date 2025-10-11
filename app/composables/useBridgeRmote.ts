@@ -37,7 +37,7 @@ export function useBridgeRemote() {
       pubstr: param.pubkey,
       tip: '',
       txInfo: 'info',
-      sleeptime: '30',
+      sleeptime: '10',
     };
     const txRes = await mmcProvider.sendTransaction({
       method: 'CreateCallContractTransaction',
@@ -89,6 +89,7 @@ export function useBridgeRemote() {
       const solAddr = new PublicKey('AFZsaEA4qLUVF41kQZSiV7uAr5n6KuiCsGjE8TMyXRwM')
         .toBuffer()
         .toString('hex');
+
       console.log(solAddr, amount);
       console.log({
         destination: config.solana.chainId.toString(),
@@ -136,7 +137,7 @@ export function useBridgeRemote() {
         pubstr: pubkey,
         tip: '0',
         txInfo: 'info',
-        sleeptime: '15',
+        sleeptime: '5',
       };
 
       const txRes = await mmcProvider.sendTransaction({
