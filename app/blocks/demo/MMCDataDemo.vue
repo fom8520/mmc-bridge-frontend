@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAsyncData, useMMCWallet } from '#imports';
 import { ethers } from 'ethers';
 
 const { address, rpcApi } = useMMCWallet();

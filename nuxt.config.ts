@@ -8,12 +8,12 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/image',
     '@nuxtjs/i18n',
-    '@nuxt/eslint',
     '@vueuse/nuxt',
     '@nuxtjs/color-mode',
     '@pinia/nuxt',
   ],
   plugins: [],
+  ssr: true,
   components: [
     {
       path: '~/components',
@@ -66,7 +66,7 @@ export default defineNuxtConfig({
     },
   },
   css: ['~/assets/css/main.css'],
-  ui: { colorMode: true },
+  ui: { colorMode: false },
 
   devServer: {
     port: 3185,

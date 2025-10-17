@@ -1,81 +1,24 @@
 import { PublicKey } from '@solana/web3.js';
 import { ethers } from 'ethers';
-import { ERC20 } from '~/utils/evm';
+// // import { ERC20 } from '~/utils/evm';
 import { HyperERC20Collateral } from '~/utils/evm/hypeErc20';
-import { MAX_INTEGER } from '~/utils/common';
+// // import { MAX_INTEGER } from '~/utils/common';
 import { HyperToken } from '~/utils/solana-wallets/contracts/hyperToken';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { bridgeChainsTestnet, type BridgeChain } from '~/utils/bridge-configs';
+
+const chains = bridgeChainsTestnet;
 
 export function useBridgeRemote() {
-  const { config, rpcApi, address, provider: mmcProvider } = useMMCWallet();
-  const { connectedWallet: solProvider } = useSolanaWallet();
-
-  async function _approve(param: {
-    token: { address: string; deployer: string; deployutxo: string };
-    owner: string;
-    spender: string;
-    amount: bigint;
-    pubkey: string;
-  }) {
-    let _isApprove = await rpcApi.isApprove(param as any);
-    if (_isApprove) {
-      return true;
-    }
-    const tokenContract = new ERC20(param.token.address);
-    const txData = await tokenContract.getFunction('approve', ...[param.spender, MAX_INTEGER]);
-    const params = {
-      addr: address.value!,
-      args: txData.data,
-      contractAddress: param.token.address,
-      deployer: param.token.deployer,
-      deployutxo: param.token.deployutxo,
-      isGasTrade: true,
-      gasTrade: [address.value!, '0xa6685d0768058e91da03880449e79b1bac47f731d1ddf0423e34c2e16e2dd6e8'],
-      isFindUtxo: false,
-      istochain: 'true',
-      money: '0',
-      pubstr: param.pubkey,
-      tip: '',
-      txInfo: 'info',
-      sleeptime: '10',
-    };
-    const txRes = await mmcProvider.sendTransaction({
-      method: 'CreateCallContractTransaction',
-      data: params,
-    });
-    await rpcApi.confirmTx(txRes['txHash']);
-
-    let i = 0;
-    while (_isApprove && i < 5) {
-      _isApprove = await rpcApi.isApprove(param as any);
-      if (_isApprove) {
-        continue;
-      }
-      i++;
-    }
-    return _isApprove;
-
-    // "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    // const contractTxData = await rpcApi.createContractTransaction({
-    //   from: address.value!,
-    //   amount: '0',
-    //   token: param.token as any,
-    //   pubkey: param.pubkey,
-    //   istochain: true,
-    //   args: txData.data,
-    //   gasToken: { assetType: '0xa6685d0768058e91da03880449e79b1bac47f731d1ddf0423e34c2e16e2dd6e8' } as any,
-    // });
-    // console.log(contractTxData);
-
-    // const txJson = contractTxData.txJson;
-    // const signedTxJson = await mmcProvider.signTransaction(txJson);
-    // const signedData = {
-    //   ...contractTxData,
-    //   txJson: signedTxJson,
-    // };
-  }
+  const fromChain = useState('bridge:from-chain', () => (chains[0]));
+  const toChain = useState('bridge:to-chain', () => (chains[1]));
+  const fromToken = useState<BridgeChain['tokens'][number] | null>('bridge:token', () => null);
+  const amount = useState('bridge:amount', () => '');
+  const recipient = useState('bridge:recipient', () => '');
 
   async function transferMmcToSolana() {
+    const { config, rpcApi, address, provider: mmcProvider } = useMMCWallet();
+
     try {
       if (!address.value) {
         return;
@@ -152,6 +95,9 @@ export function useBridgeRemote() {
   }
 
   async function transferSolanaToMmc() {
+    const { config, address } = useMMCWallet();
+    const { connectedWallet: solProvider } = useSolanaWallet();
+
     try {
       const solMMC = config.solana.mmc;
       const hyperToken = new HyperToken(solMMC.hyperTokenCollateral, {
@@ -178,7 +124,81 @@ export function useBridgeRemote() {
   }
 
   return {
+    chains,
+    fromChain,
+    toChain,
+    fromToken,
+    amount,
+    recipient,
+
     transferMmcToSolana,
     transferSolanaToMmc,
   };
 }
+
+// async function _approve(param: {
+//   token: { address: string; deployer: string; deployutxo: string };
+//   owner: string;
+//   spender: string;
+//   amount: bigint;
+//   pubkey: string;
+// }) {
+//   const { rpcApi, address, provider: mmcProvider } = useMMCWallet();
+
+//   let _isApprove = await rpcApi.isApprove(param as any);
+//   if (_isApprove) {
+//     return true;
+//   }
+//   const tokenContract = new ERC20(param.token.address);
+//   const txData = await tokenContract.getFunction('approve', ...[param.spender, MAX_INTEGER]);
+//   const params = {
+//     addr: address.value!,
+//     args: txData!.data!,
+//     contractAddress: param.token.address,
+//     deployer: param.token.deployer,
+//     deployutxo: param.token.deployutxo,
+//     isGasTrade: true,
+//     gasTrade: [address.value!, '0xa6685d0768058e91da03880449e79b1bac47f731d1ddf0423e34c2e16e2dd6e8'],
+//     isFindUtxo: false,
+//     istochain: 'true',
+//     money: '0',
+//     pubstr: param.pubkey,
+//     tip: '',
+//     txInfo: 'info',
+//     sleeptime: '10',
+//   };
+//   const txRes = await mmcProvider.sendTransaction({
+//     method: 'CreateCallContractTransaction',
+//     data: params,
+//   });
+//   await rpcApi.confirmTx(txRes['txHash']);
+
+//   let i = 0;
+//   while (_isApprove && i < 5) {
+//     _isApprove = await rpcApi.isApprove(param as any);
+//     if (_isApprove) {
+//       continue;
+//     }
+//     i++;
+//   }
+//   return _isApprove;
+
+//   // "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+//   // const contractTxData = await rpcApi.createContractTransaction({
+//   //   from: address.value!,
+//   //   amount: '0',
+//   //   token: param.token as any,
+//   //   pubkey: param.pubkey,
+//   //   istochain: true,
+//   //   args: txData.data,
+//   //   gasToken: { assetType: '0xa6685d0768058e91da03880449e79b1bac47f731d1ddf0423e34c2e16e2dd6e8' } as any,
+//   // });
+//   // console.log(contractTxData);
+
+//   // const txJson = contractTxData.txJson;
+//   // const signedTxJson = await mmcProvider.signTransaction(txJson);
+//   // const signedData = {
+//   //   ...contractTxData,
+//   //   txJson: signedTxJson,
+//   // };
+// }

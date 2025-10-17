@@ -132,6 +132,7 @@ onMounted(() => {
   <UInput
     ref="inputRef"
     :style="style"
+    size="xl"
     :type="inputType === 'number' ? 'text' : inputType"
     :model-value="inputValue"
     :maxlength="type !== 'number' ? max : undefined"
@@ -139,8 +140,7 @@ onMounted(() => {
     :readonly="onlyRead"
     :min="min"
     :ui="{
-      root: 'bg-white/10 backdrop-blur-md ',
-      base: cn('border-none bg-transparent text-xs leading-tight text-primary', inputClass),
+      base: cn(inputClass),
     }"
     :disabled="disabled"
     @input="onInput"
