@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@nuxt/eslint',
-    '@nuxt/image',
+    // '@nuxt/image',
     '@nuxtjs/i18n',
     '@vueuse/nuxt',
     '@nuxtjs/color-mode',
@@ -132,5 +132,4 @@ export default defineNuxtConfig({
       },
     ],
   },
-  image: { densities: [1, 2] },
 });

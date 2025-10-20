@@ -255,7 +255,9 @@ async function onSwap() {
 }
 
 watch(tokenBalance, () => {
-  formRef.value?.validate({ name: ['amount'] });
+  if (fromToken.value) {
+    formRef.value?.validate({ name: ['amount'] });
+  }
 });
 </script>
 
@@ -279,6 +281,7 @@ watch(tokenBalance, () => {
               <UAvatar
                 :key="fromChain?.icon + 'from'"
                 :src="fromChain?.icon"
+                :alt="fromChain?.label"
                 :size="'sm'"
                 :ui="{
                   image: ' object-contain',
@@ -322,6 +325,7 @@ watch(tokenBalance, () => {
               <UAvatar
                 :key="toChain?.icon + 'to'"
                 :src="toChain?.icon"
+                :alt="toChain?.label"
                 :size="'sm'"
                 :ui="{
                   image: ' object-contain',
@@ -356,10 +360,28 @@ watch(tokenBalance, () => {
               placeholder="Select Token"
               :ui="{
                 trailing: '!pe-3',
+                base: fromToken ? 'pl-10' : 'pl-3',
               }"
               class="w-full"
               @click="onToken"
             >
+              <template #leading>
+                <span
+                  v-if="fromToken"
+                  class="flex"
+                >
+                  <UAvatar
+                    :key="fromToken?.icon + 'token'"
+                    :src="fromToken?.icon"
+                    :alt="fromToken?.symbol"
+                    :size="'2xs'"
+                    :ui="{
+                      image: ' object-contain',
+                      root: cn('p-0.5', fromToken?.icon ? ' bg-transparent' : ''),
+                    }"
+                  />
+                </span>
+              </template>
               <template #trailing>
                 <span>
                   <UIcon
