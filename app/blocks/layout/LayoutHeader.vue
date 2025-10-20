@@ -11,7 +11,9 @@
     </div>
 
     <div class="">
-      <ConnectWallet />
+      <ClientOnly>
+        <ConnectWallet />
+      </ClientOnly>
     </div>
   </div>
 </template>

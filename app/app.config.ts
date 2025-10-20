@@ -72,8 +72,8 @@ export default defineAppConfig({
           ' !ring-primary-800',
           ' !bg-[#232323]',
         ],
-        leading: 'absolute inset-y-0 start-0 flex items-center',
-        leadingIcon: 'shrink-0 text-dimmed',
+        leading: 'absolute inset-y-0 start-0 flex items-center !ps-2',
+        leadingIcon: 'shrink-0 text-dimmed ',
         leadingAvatar: 'shrink-0',
         leadingAvatarSize: '',
         trailing: 'absolute inset-y-0 end-0 flex items-center !p-1',
@@ -86,6 +86,7 @@ export default defineAppConfig({
         label: ' text-elevated text-xs font-normal',
         container: 'mt-2',
         hint: ' text-xs leading-4 text-elevated',
+        error: 'text-xs font-normal mt-1',
       },
     },
     button: {

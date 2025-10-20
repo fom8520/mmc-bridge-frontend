@@ -48,6 +48,9 @@ export class StarProvider {
 
   provider: any;
 
+  name = 'LOLlet';
+  icon = '/wallet/LOLlet.png';
+
   connect(): Promise<string[]> {
     return this.provider.connect();
   }

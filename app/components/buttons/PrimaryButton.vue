@@ -29,7 +29,10 @@ withDefaults(defineProps<{
         v-if="loading"
         class="flex"
       >
-        <UIcon name="i-tdesign-loading" />
+        <UIcon
+          name="i-tdesign-loading"
+          class=" animate-spin"
+        />
       </span>
       <span v-else>
         <slot />

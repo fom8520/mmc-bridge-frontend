@@ -2,6 +2,8 @@ import { useStorage } from '@vueuse/core';
 import { SolanaWalletController } from '~/utils/solana-wallets';
 import type { SolanaWalletType } from '~/utils/solana-wallets';
 
+let isInit = false;
+
 export function useSolanaWallet() {
   const wallets = SolanaWalletController.wallets;
 
@@ -48,16 +50,20 @@ export function useSolanaWallet() {
   }
 
   async function disconnectWallet() {
+    connectedWalletId.value = null;
     await connectedWallet.value?.disconnect();
     address.value = null;
     connectedWallet.value = null;
   }
 
-  if (import.meta.client) {
-    if (connectedWalletId.value && !automaticallyConnected.value) {
-      connectWallet(connectedWalletId.value);
+  onMounted(() => {
+    if (import.meta.client && !isInit) {
+      if (connectedWalletId.value && !automaticallyConnected.value) {
+        connectWallet(connectedWalletId.value);
+        isInit = true;
+      }
     }
-  }
+  });
 
   return {
     wallets,

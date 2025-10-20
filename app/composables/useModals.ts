@@ -1,8 +1,13 @@
 import type { OverlayOptions } from '@nuxt/ui/runtime/composables/useOverlay.js';
 import type { ComponentEmit, ComponentProps } from 'vue-component-type-helpers';
-import { BasicModal } from '#components';
+import { BasicModal, SelectChainModal, SelectTokenModal, ConnectWalletModal } from '#components';
 
-const components = { BasicModal };
+const components = {
+  BasicModal,
+  SelectChainModal,
+  SelectTokenModal,
+  ConnectWalletModal,
+};
 type CloseEventArgType<T> = T extends (event: 'close', args_0: infer R) => void
   ? R
   : never;

@@ -1,13 +1,20 @@
 <script lang="ts" setup>
-import type { ToasterProps } from '@nuxt/ui';
-
-const toaster: ToasterProps = { position: 'bottom-right' };
+import { Toaster } from 'vue-sonner';
+import 'vue-sonner/style.css';
 </script>
 
 <template>
-  <UApp :toaster="toaster">
+  <UApp>
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
   </UApp>
+  <ClientOnly>
+    <Teleport to="body">
+      <Toaster
+        :position="'bottom-right'"
+        rich-colors
+      />
+    </Teleport>
+  </ClientOnly>
 </template>

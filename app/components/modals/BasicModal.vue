@@ -16,8 +16,8 @@ const props = withDefaults(
     type?: 0 | 1;
   }>(),
   {
-    showTitle: true,
-    showClose: true,
+    showTitle: false,
+    showClose: false,
     title: '',
     dismissible: true,
     fullscreen: false,
@@ -53,6 +53,16 @@ defineExpose({
     _isOpen.value = false;
   },
 });
+
+const tem = useTemplateRef('baseModal');
+
+onMounted(async () => {
+  await nextTick();
+
+  tem.value?.querySelectorAll('input').forEach((el) => {
+    el.blur();
+  });
+});
 </script>
 
 <template>
@@ -60,10 +70,10 @@ defineExpose({
     v-model:open="_isOpen"
     :dismissible="dismissible"
     :ui="Object.assign({
-      overlay: 'z-30 bg-black/70',
+      overlay: 'z-30 bg-black/60',
       content: cn(
-        'w-full max-w-[300px] z-40 rounded-none bg-transparent backdrop-blur-sm',
-        fullscreen ? 'w-full !h-screen !max-h-screen !bg-neutral-950' : '',
+        'w-full max-w-[320px] z-40 !ring-0 bg-transparent pb-40',
+        fullscreen ? 'w-full !h-screen !max-h-screen !bg-secondary-900' : '',
       ),
     }, ui)"
   >
@@ -78,9 +88,12 @@ defineExpose({
     </template>
 
     <template #content="{ close }">
-      <div class="w-full lg:h-auto h-full relative flex flex-col">
+      <div
+        ref="baseModal"
+        class="w-full lg:h-auto h-full relative flex flex-col rounded-md bg-secondary-900 backdrop-blur-sm "
+      >
         <div class=" absolute top-0 left-0 w-full h-full -z-0">
-          <img
+          <!-- <img
             src="~/assets/images/modal-bg.svg"
             class="h-full w-full object-fill"
             :class="{ 'block ': type === 0, ' md:!block hidden': type !== 0 }"
@@ -89,7 +102,7 @@ defineExpose({
             src="~/assets/images/modal-bg-1.svg"
             class=" w-full object-fill"
             :class="{ 'lg:hidden block': type === 1 }"
-          >
+          > -->
         </div>
         <div
           v-if="showClose"
@@ -108,7 +121,7 @@ defineExpose({
 
         <div
           v-if="!fullscreen"
-          class="w-full lg:h-auto h-full py-[42px] z-10"
+          class="w-full lg:h-auto h-full py-[18px] z-10"
         >
           <div
             v-if="showTitle && title"
@@ -120,7 +133,7 @@ defineExpose({
               </slot>
             </p>
           </div>
-          <div :class="cn('w-full max-h-[70vh]  overflow-y-auto  px-[30px]', contentClass)">
+          <div :class="cn('w-full max-h-[70vh]  overflow-y-auto  ', contentClass)">
             <slot name="content" />
           </div>
         </div>

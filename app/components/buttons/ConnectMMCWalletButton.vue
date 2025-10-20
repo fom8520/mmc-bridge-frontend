@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner';
+
 const { address, connectWallet, disconnectWallet } = useMMCWallet();
 
 const loading = ref(false);
@@ -12,7 +14,7 @@ async function connect() {
     await connectWallet();
   } catch (err) {
     if (err instanceof Error) {
-      useToaster().error(err.message);
+      toast.error(err.message);
     }
   } finally {
     loading.value = false;
@@ -25,7 +27,7 @@ async function onDisconnect() {
     await disconnectWallet();
   } catch (err) {
     if (err instanceof Error) {
-      useToaster().error(err.message);
+      toast.error(err.message);
     }
   } finally {
     loading.value = false;

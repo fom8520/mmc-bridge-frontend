@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { clsx } from 'clsx';
 import type { ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { toast } from 'vue-sonner';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -30,8 +31,8 @@ export async function copyText(str: string) {
     if (!navigator.clipboard) throw Error;
     await navigator.clipboard.writeText(str);
   }
-  useToast().add({ description: 'Copied' });
 
+  toast.success('Copied');
   return true;
 }
 

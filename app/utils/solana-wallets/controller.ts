@@ -9,12 +9,12 @@ import {
 } from '@solana/wallet-adapter-base';
 import type { SolanaWalletType } from './types';
 import { SOLANA_CHAIN_IDS, walletsAdapter } from './utils';
-import type {
-  Connection,
+import {
   PublicKey,
-  Transaction,
-  TransactionSignature,
-  VersionedTransaction,
+  type Connection,
+  type Transaction,
+  type TransactionSignature,
+  type VersionedTransaction,
 } from '@solana/web3.js';
 
 const walletObj: any = {};
@@ -44,6 +44,16 @@ export class SolanaWalletController {
     ).map(k => new SolanaWalletController(k));
   }
 
+  static isValidSolanaAddress(address: string): boolean {
+    try {
+      const pubkey = new PublicKey(address);
+
+      return pubkey.toBase58() === address;
+    } catch {
+      return false;
+    }
+  }
+
   static isSolana(chainId: number) {
     return Object.values(SOLANA_CHAIN_IDS).includes(chainId);
   }
@@ -52,7 +62,7 @@ export class SolanaWalletController {
     switch (chainId) {
       case 1399811149: // ??
         return WalletAdapterNetwork.Mainnet;
-      default:
+      default:// 1399811149
         return WalletAdapterNetwork.Devnet;
     }
   }

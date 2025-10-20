@@ -199,9 +199,9 @@ export class MMCRpcApi extends HttpFetch {
       const txJson = JSON.parse(txData['txJson'] || '{}');
       const output = JSON.parse(txJson['data'])?.['txinfo']?.['output'];
 
-      return BigInt(output.startsWith('0x') ? output : `0x${output}`).toString();
+      return BigInt(output.startsWith('0x') ? output : `0x${output}`);
     } catch {
-      return '0';
+      return 0n;
     }
   };
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner';
+
 const { transferMmcToSolana, transferSolanaToMmc } = useBridgeRemote();
 
 const confirming = ref('');
@@ -14,7 +16,7 @@ async function onBridge(type: 'mmc' | 'sol') {
     console.log(err);
 
     if (err instanceof Error) {
-      useToaster().error(err.message);
+      toast.error(err.message);
     }
   } finally {
     confirming.value = '';

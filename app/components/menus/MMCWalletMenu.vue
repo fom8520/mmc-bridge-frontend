@@ -1,46 +1,14 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { toast } from 'vue-sonner';
-import { useSolanaWallet } from '~/composables/useSolanaWallet';
-import type {
-  SolanaWalletController,
-  SolanaWalletType,
-} from '~/utils/solana-wallets';
 
-const emits = defineEmits<{
-  (e: 'finish', val: 'connect' | 'disconnect'): void;
-}>();
+const { address, provider, connectWallet, disconnectWallet } = useMMCWallet();
 
-const { wallets, connectWallet, disconnectWallet, connectedWallet, address }
-  = useSolanaWallet();
-
-const connectingId = ref<SolanaWalletType>();
-const onConnect = async (wallet: SolanaWalletController) => {
-  if (connectingId.value) {
-    return;
-  }
-  try {
-    connectingId.value = wallet.id;
-    await connectWallet(wallet.id);
-    emits('finish', 'connect');
-  } catch (err) {
-    if (err instanceof Error) {
-      toast.error(err.message);
-    }
-  } finally {
-    connectingId.value = undefined;
-  }
-};
-
-const onDisconnect = async () => {
-  try {
-    await disconnectWallet();
-    emits('finish', 'disconnect');
-  } catch (err) {
-    if (err instanceof Error) {
-      toast.error(err.message);
-    }
-  }
-};
+const wallets = [
+  {
+    label: provider.name,
+    icon: provider.icon,
+  },
+];
 
 const onCopy = async () => {
   try {
@@ -49,6 +17,20 @@ const onCopy = async () => {
     toast.error('Copy error');
   }
 };
+
+const connecting = ref(false);
+async function onConnect() {
+  try {
+    connecting.value = true;
+    await connectWallet();
+  } catch (err) {
+    if (err instanceof Error) {
+      toast.error(err.message);
+    }
+  } finally {
+    connecting.value = false;
+  }
+}
 </script>
 
 <template>
@@ -57,11 +39,10 @@ const onCopy = async () => {
       v-for="wallet in wallets"
       :key="wallet.label"
       class="cursor-pointer rounded-lg select-none border-1 border-primary-800 p-2.5"
-      :class="{ ' bg-primary-800/20': connectedWallet?.id === wallet.id }"
     >
       <div
         class="w-full flex flex-col items-center relative"
-        @click.stop="onConnect(wallet)"
+        @click.stop="onConnect"
       >
         <!-- <div
           class="w-2 h-2 rounded-full mr-1"
@@ -83,10 +64,10 @@ const onCopy = async () => {
         >
           <span class=" text-md font-normal text-primary">{{ wallet.label }}</span>
           <div
-            v-if="wallet.id === connectedWallet?.id && address"
+            v-if="address"
             class="w-full text-xs font-normal flex pt-2.5"
           >
-            <div>{{ shortAddress(address) }}</div>
+            <div>{{ shortAddress(address || '') }}</div>
             <div
               class="ml-1 flex items-center"
               @click.stop="onCopy"
@@ -99,7 +80,7 @@ const onCopy = async () => {
 
             <div
               class="flex items-center justify-center ml-3"
-              @click.stop="onDisconnect"
+              @click.stop="disconnectWallet"
             >
               <UIcon
                 class="w-4 h-4"
@@ -115,7 +96,7 @@ const onCopy = async () => {
           </div>
         </div>
         <div
-          v-if="wallet.id === connectingId && connectingId"
+          v-if="connecting"
           class=" absolute w-full h-full flex items-center justify-center backdrop-blur-lg "
         >
           <UIcon
@@ -127,5 +108,3 @@ const onCopy = async () => {
     </div>
   </div>
 </template>
-
-<style scoped lang="scss"></style>
