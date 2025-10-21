@@ -4,13 +4,13 @@ import { ethers } from 'ethers';
 import { HyperERC20Collateral } from '~/utils/evm/hypeErc20';
 // // import { MAX_INTEGER } from '~/utils/common';
 import { HyperToken } from '~/utils/solana-wallets/contracts/hyperToken';
-import { bridgeChainsTestnet, type BridgeChain } from '~/utils/bridge-configs';
 import { SolanaApi } from '~/utils/apis/solana-api';
 import { SolanaWalletController } from '~/utils/solana-wallets';
-
-const chains = bridgeChainsTestnet;
+import type { BridgeChain } from '~/utils/bridge-configs';
 
 export function useBridgeRemote() {
+  const { chains } = useBridgeConfig();
+
   const fromChain = useState('bridge:from-chain', () => chains[0]);
   const toChain = useState('bridge:to-chain', () => chains[1]);
   const fromToken = useState<BridgeChain['tokens'][number] | null>(
@@ -74,7 +74,7 @@ export function useBridgeRemote() {
     }
   }
 
-  async function transferMmcToSolana() {
+  async function transferMmcToAll(_recipient: string) {
     const { rpcApi, address, provider: mmcProvider } = useMMCWallet();
 
     try {
@@ -95,22 +95,14 @@ export function useBridgeRemote() {
         return;
       }
 
-      if (!SolanaWalletController.isValidSolanaAddress(recipient.value)) {
-        throw new Error('Please enter the correct Solana recipient address.');
-      }
-
       const hyperErc20 = new HyperERC20Collateral(_config.hyperTokenCollateral);
       const _amount = ethers.utils.parseUnits(amount.value, _fromToken.decimals).toBigInt();
 
       const pubkey = await mmcProvider.getPublicKey();
 
-      const solAddr = new PublicKey(recipient.value)
-        .toBuffer()
-        .toString('hex');
-
       const txData = await hyperErc20.transferRemote({
         destination: _solanaChain.id.toString(),
-        recipient: `0x${solAddr}`,
+        recipient: _recipient,
         amountOrId: _amount,
       });
       console.log(txData);
@@ -123,11 +115,11 @@ export function useBridgeRemote() {
         contractAddress: hyperErc20.address,
         deployer: utxoInfo.deployer,
         deployutxo: utxoInfo.utxo,
-        isGasTrade: false,
+        isGasTrade: true,
         gasTrade: [
           address.value,
-          'Vote',
-          // '0xa6685d0768058e91da03880449e79b1bac47f731d1ddf0423e34c2e16e2dd6e8',
+          // 'Vote',
+          '0x5b0a968d45eb5e13318e4580dcff1d44f945c3cd299f1d38612cf46f71920d07',
         ],
         isFindUtxo: false,
         istochain: 'true',
@@ -151,7 +143,11 @@ export function useBridgeRemote() {
     }
   }
 
-  async function transferSolanaToMmc() {
+  /**
+   * Support mmc chain and evm chains
+   * @returns
+   */
+  async function transferSolanaToEvm() {
     const { connectedWallet: solProvider } = useSolanaWallet();
 
     const _solanaChain = fromChain.value;
@@ -174,6 +170,9 @@ export function useBridgeRemote() {
         chainId: _solanaChain.id,
         destination_domain: _toChain.id,
       });
+
+      console.log(amount.value);
+
       const _amount = ethers.utils.parseUnits(amount.value, _fromToken.decimals).toBigInt();
       const res = await hyperToken.transferRemote(solProvider.value!, {
         token: _fromToken.address,
@@ -196,8 +195,8 @@ export function useBridgeRemote() {
   function solanaBridge() {
     const _toChain = toChain.value;
 
-    if (_toChain?.type === 'MMC') {
-      return transferSolanaToMmc();
+    if (['MMC', 'EVM'].includes(_toChain?.type || '')) {
+      return transferSolanaToEvm();
     }
   }
 
@@ -205,7 +204,17 @@ export function useBridgeRemote() {
     const _toChain = toChain.value;
 
     if (_toChain?.type === 'Solana') {
-      return transferMmcToSolana();
+      if (!SolanaWalletController.isValidSolanaAddress(recipient.value)) {
+        throw new Error('Please enter the correct Solana recipient address.');
+      }
+      const solAddr = new PublicKey(recipient.value)
+        .toBuffer()
+        .toString('hex');
+
+      return transferMmcToAll(`0x${solAddr}`);
+    } else if (_toChain?.type === 'EVM') {
+      if (ethers.utils.isAddress(recipient.value))
+        return transferMmcToAll(ethers.utils.hexZeroPad(recipient.value, 32));
     }
   }
 
@@ -229,8 +238,10 @@ export function useBridgeRemote() {
 
     getBalance,
     swap,
-    transferMmcToSolana,
-    transferSolanaToMmc,
+    transferMmcToSolana: transferMmcToAll,
+    transferMmcToAll,
+    transferSolanaToMmc: transferSolanaToEvm,
+    transferSolanaToEvm,
   };
 }
 

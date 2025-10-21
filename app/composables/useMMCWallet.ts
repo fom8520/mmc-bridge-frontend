@@ -1,9 +1,8 @@
 import { MMCRpcApi } from '~/utils/apis/mmc-rpc-api';
-import { mmcNetworkConfigs } from '~/utils/configs';
 import { StarProvider } from '~/utils/mcc-wallets/mmc-provider';
 
 export function useMMCWallet() {
-  const rpcApi = new MMCRpcApi(import.meta.client ? (window.location.origin) : '');
+  const rpcApi = new MMCRpcApi(import.meta.client ? (window.location.origin) : 'http://222.128.23.254:23134', { 'Content-Type': 'text/plain;charset=UTF-8' });
   const walletProvider = new StarProvider();
   const address = useState<string | null>('mmc:address', () => null);
 
@@ -30,7 +29,6 @@ export function useMMCWallet() {
 
   return {
 
-    config: mmcNetworkConfigs,
     provider: walletProvider,
     address,
     rpcApi,

@@ -20,12 +20,13 @@
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/i18n": "^10.1.0",
     "@pinia/nuxt": "0.11.2",
+    "@reown/appkit": "^1.8.10",
+    "@reown/appkit-adapter-ethers5": "^1.8.10",
     "@solana/buffer-layout-utils": "^0.3.0",
     "@solana/spl-token": "^0.4.14",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-solflare": "^0.6.32",
     "@solana/web3.js": "^1.98.4",
-    "@web3modal/ethers": "^5.1.11",
     "bignumber.js": "^9.3.1",
     "borsh": "^0.7.0",
     "buffer": "^6.0.3",
@@ -45,5 +46,9 @@
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
     "vite-plugin-node-polyfills": "^0.24.0"
+  },
+  "optionalDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
   }
 }

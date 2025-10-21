@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BridgeChain } from '~/utils/bridge-configs';
+import { cn } from '~/utils/helpers';
 
 const props = defineProps<{
   chains: BridgeChain[];
@@ -76,7 +77,7 @@ watchDebounced(searchStr, () => {
                     :key=" item.icon"
                     :src="item.icon"
                     :size="'2xs'"
-                    :ui="{ image: ' object-contain', root: cn('p-0.5', item.icon ? ' bg-transparent' : '') }"
+                    :ui="{ image: 'object-contain rounded-none', root: cn('p-0.5', item.icon ? ' bg-transparent' : '') }"
                   />
 
                   <div class=" flex flex-col font-normal leading-4 overflow-hidden">

@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner';
 
-const { address, provider, connectWallet, disconnectWallet } = useMMCWallet();
+const { address, walletInfo, disconnect, modal } = useEvmWallet();
 
-const wallets = [
-  {
-    label: provider.name,
-    icon: provider.icon,
-  },
-];
+const wallets = computed(() => {
+  return [
+    {
+      label: walletInfo.value.label || 'Wallet Connect',
+      icon: walletInfo.value.icon || '/wallet/wallet.svg',
+    },
+  ];
+});
 
 const onCopy = async () => {
   try {
@@ -22,7 +24,7 @@ const connecting = ref(false);
 async function onConnect() {
   try {
     connecting.value = true;
-    await connectWallet();
+    await modal.open();
   } catch (err) {
     if (err instanceof Error) {
       toast.error(err.message);
@@ -57,7 +59,7 @@ async function onConnect() {
           :src="wallet.icon"
           :alt="wallet.label"
           size="md"
-          :ui="{ root: 'rounded-md' }"
+          :ui="{ root: cn('rounded-md', wallet.icon ? ' bg-transparent' : ''), image: 'rounded-none' }"
         />
 
         <div
@@ -81,7 +83,7 @@ async function onConnect() {
 
             <div
               class="flex items-center justify-center ml-3"
-              @click.stop="disconnectWallet"
+              @click.stop="() => disconnect({ })"
             >
               <UIcon
                 class="w-4 h-4"

@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
   ],
   plugins: [],
-  ssr: true,
+  ssr: false,
   components: [
     {
       path: '~/components',
@@ -24,6 +24,7 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
+  imports: { autoImport: true },
   devtools: { enabled: true },
   app: {
     head: {
@@ -67,22 +68,23 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/css/main.css'],
   ui: { colorMode: false },
+  routeRules: { '/rpc-api/**': { proxy: 'http://222.128.23.254:23134/**' } },
 
   devServer: {
     port: 3185,
     host: '0.0.0.0',
   },
   compatibilityDate: '2025-07-15',
-  nitro: {
-    compressPublicAssets: false,
-    devProxy: {
-      '/rpc-api/': {
-        target: 'http://222.128.23.254:23134',
-        changeOrigin: true,
-        prependPath: false,
-      },
-    },
-  },
+  // nitro: {
+  //   compressPublicAssets: false,
+  //   devProxy: {
+  //     '/rpc-api': {
+  //       target: 'http://222.128.23.254:23134',
+  //       changeOrigin: true,
+  //       // prependPath: false,
+  //     },
+  //   },
+  // },
   hooks: {
     'vite:extendConfig'(config, { isClient }) {
       if (isClient) {

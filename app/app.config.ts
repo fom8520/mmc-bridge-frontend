@@ -1,7 +1,7 @@
 import { displayName, description } from '../package.json';
 
 export const walletConfig = {
-  projectId: '07556f4c9346cbd23fa53dde19889e99',
+  projectId: '9d43f1ed793686bae2241e23f5294746',
   metadata: {
     name: displayName,
     description: description,

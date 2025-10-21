@@ -1,3 +1,4 @@
+import { bnb_testnet } from './bnb';
 import { mmc_testnet } from './mmc';
 import { solana_devnet } from './solana';
 
@@ -8,10 +9,12 @@ export type BridgeChain = {
   icon: string;
   rpc: string;
   network: string;
+  symbol: string;
   /**
    * 'EVM' | 'Solana'  | 'MMC'
    */
   type: string; // 'EVM' | 'Solana' | 'MMC'
+  explorer: string;
   tokens: {
     name: string;
     symbol: string;
@@ -36,6 +39,7 @@ export type BridgeChain = {
 export const bridgeChainsTestnet: BridgeChain[] = [
   mmc_testnet,
   solana_devnet,
+  bnb_testnet,
 ];
 
 export default { bridgeChainsTestnet };

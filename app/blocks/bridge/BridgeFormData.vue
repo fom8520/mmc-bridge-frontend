@@ -3,12 +3,22 @@ import { ethers } from 'ethers';
 import { toast } from 'vue-sonner';
 import { number, object, string, ValidationError } from 'yup';
 import { SolanaWalletController } from '~/utils/solana-wallets';
+import { formatAmount, cn } from '~/utils/helpers';
 
-const { recipient, amount, fromChain, toChain, fromToken, chains, getBalance, swap }
-  = useBridgeRemote();
+const {
+  recipient,
+  amount,
+  fromChain,
+  toChain,
+  fromToken,
+  chains,
+  getBalance,
+  swap,
+} = useBridgeRemote();
 
-const { address: mmcAddress } = useMMCWallet();
+const { address: mmcAddress, rpcApi } = useMMCWallet();
 const { address: solanaAddress } = useSolanaWallet();
+const { address: evmAddress } = useEvmWallet();
 
 const formRef = useTemplateRef('form');
 
@@ -27,9 +37,10 @@ const { data: tokenBalance, status: balanceStatus } = useAsyncData(
 const connectedWallet = computed(() => {
   const _chain = fromChain.value;
   if (_chain) {
-    const walletAddress: { [key: string]: string | null } = {
+    const walletAddress: { [key: string]: string | null | undefined } = {
       Solana: solanaAddress.value,
       MMC: mmcAddress.value,
+      EVM: evmAddress.value,
     };
 
     return walletAddress[_chain.type];
@@ -38,23 +49,36 @@ const connectedWallet = computed(() => {
   return null;
 });
 
-const showSelf = computed(() => {
+const selfAddress = computed(() => {
   const _chain = toChain.value;
   if (_chain) {
     if (_chain.type === 'Solana') {
-      return !!solanaAddress.value;
+      return solanaAddress.value;
     } else if (_chain.type === 'MMC') {
-      return !!mmcAddress.value;
+      return mmcAddress.value;
+    } else if (_chain.type === 'EVM') {
+      return evmAddress.value;
     }
   }
-  return false;
+
+  return '';
+});
+
+const showSelf = computed(() => {
+  return !!selfAddress.value;
 });
 
 const formatedAmount = computed(() => {
   if (!fromToken.value) {
     return '0';
   }
-  return formatAmount(ethers.utils.formatUnits(tokenBalance.value || 0n, fromToken.value?.decimals), fromToken.value?.decimals);
+  return formatAmount(
+    ethers.utils.formatUnits(
+      tokenBalance.value || 0n,
+      fromToken.value?.decimals,
+    ),
+    fromToken.value?.decimals,
+  );
 });
 
 const formValues = computed(() => {
@@ -109,21 +133,20 @@ const schema = computed(() => {
           return true;
         },
       }),
-    amount: string().required('Please enter the amount.')
+    amount: string()
+      .required('Please enter the amount.')
       .test({
         name: 'amount',
         test: function (val) {
           const _token = fromToken.value;
           if (val && _token) {
-            const _val = ethers.utils.parseUnits(val, _token.decimals).toBigInt();
+            const _val = ethers.utils
+              .parseUnits(val, _token.decimals)
+              .toBigInt();
             const _balance = tokenBalance.value || 0n;
 
             if (_val > _balance) {
-              throw new ValidationError(
-                'Insufficient balance',
-                val,
-                this.path,
-              );
+              throw new ValidationError('Insufficient balance', val, this.path);
             }
           }
           return true;
@@ -148,18 +171,17 @@ function onMax() {
   if (!fromToken.value) {
     amount.value = '0';
   }
-  amount.value = ethers.utils.formatUnits(tokenBalance.value || '0', fromToken.value?.decimals);
+  amount.value = ethers.utils.formatUnits(
+    tokenBalance.value || '0',
+    fromToken.value?.decimals,
+  );
 }
 
 function setSelf() {
   const _chain = toChain.value;
 
   if (_chain) {
-    if (_chain.type === 'Solana') {
-      recipient.value = solanaAddress.value || '';
-    } else if (_chain.type === 'MMC') {
-      recipient.value = mmcAddress.value || '';
-    }
+    recipient.value = selfAddress.value || '';
 
     setTimeout(() => {
       formRef.value?.validate({ name: ['recipient'] });
@@ -176,10 +198,10 @@ function onSelectChain(type: 'from' | 'to') {
           return false;
         }
 
-        // the from token is selected
-        if (fromToken.value && type === 'to') {
-          return item.tokens.some(t => t.symbol === fromToken.value?.symbol);
-        }
+        // // the from token is selected
+        // if (fromToken.value && type === 'to') {
+        //   return item.tokens.some(t => t.symbol === fromToken.value?.symbol);
+        // }
 
         let _chain;
         if (type === 'from') {
@@ -192,7 +214,7 @@ function onSelectChain(type: 'from' | 'to') {
         return (
           _chain?.tokens.some((c) => {
             const keys = Object.keys(c.contract);
-
+            console.log(keys);
             return keys.includes(item.value);
           }) ?? true
         );
@@ -201,12 +223,12 @@ function onSelectChain(type: 'from' | 'to') {
       onSelect: (val) => {
         if (type === 'from') {
           fromChain.value = val;
-          fromToken.value = null;
           amount.value = '';
         } else {
           toChain.value = val;
           recipient.value = '';
         }
+        fromToken.value = null;
       },
     },
   });
@@ -259,6 +281,17 @@ watch(tokenBalance, () => {
     formRef.value?.validate({ name: ['amount'] });
   }
 });
+
+onMounted(() => {
+  rpcApi.call('GetBlockByHeight', {
+    params: {
+      beginHeight: '1',
+      endHeight: '2',
+    },
+  }).then((res) => {
+    console.log(res);
+  });
+});
 </script>
 
 <template>
@@ -284,7 +317,7 @@ watch(tokenBalance, () => {
                 :alt="fromChain?.label"
                 :size="'sm'"
                 :ui="{
-                  image: ' object-contain',
+                  image: 'object-contain rounded-none',
                   root: cn('p-0.5', fromChain?.icon ? ' bg-transparent' : ''),
                 }"
               />
@@ -328,7 +361,7 @@ watch(tokenBalance, () => {
                 :alt="toChain?.label"
                 :size="'sm'"
                 :ui="{
-                  image: ' object-contain',
+                  image: 'object-contain rounded-none',
                   root: cn('p-0.5', toChain?.icon ? ' bg-transparent' : ''),
                 }"
               />
@@ -377,7 +410,10 @@ watch(tokenBalance, () => {
                     :size="'2xs'"
                     :ui="{
                       image: ' object-contain',
-                      root: cn('p-0.5', fromToken?.icon ? ' bg-transparent' : ''),
+                      root: cn(
+                        'p-0.5',
+                        fromToken?.icon ? ' bg-transparent' : '',
+                      ),
                     }"
                   />
                 </span>
@@ -400,7 +436,7 @@ watch(tokenBalance, () => {
             class="w-1/2 pl-1.5"
           >
             <template #hint>
-              <div class=" text-xs font-normal leading-4">
+              <div class="text-xs font-normal leading-4">
                 <span>{{ `My balance：` }}</span>
                 <span v-if="balanceStatus === 'pending'">
                   <USkeleton class="h-2 w-10 inline-block" />
@@ -409,7 +445,7 @@ watch(tokenBalance, () => {
                   <span>{{ formatedAmount }}</span>
                   <span
                     v-if="fromToken"
-                    class=" text-[10px] leading-4"
+                    class="text-[10px] leading-4"
                   >
                     {{ ` ${fromToken?.symbol || ''}` }}
                   </span>

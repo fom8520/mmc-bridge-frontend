@@ -100,7 +100,6 @@ export class HttpFetch {
   ): Promise<T> {
     const url = new URL(path, this.baseURL).toString();
 
-    // 超时 + 合并外部 signal
     const controller = new AbortController();
     const { timeout = this.defaults.timeout, signal: outerSignal } = opts;
     const timer = setTimeout(() => controller.abort(), timeout);
@@ -163,10 +162,10 @@ export class HttpFetch {
     });
     const fullPath = qs.toString() ? `${path}?${qs.toString()}` : path;
 
-    return await this.request<T>('GET', fullPath, opts);
+    return this.request<T>('GET', fullPath, opts);
   };
 
   httpPost = async <T = any>(path: string, body: HttpBody, opts?: RequestOptions) => {
-    return await this.request<T>('POST', path, opts, body);
+    return this.request<T>('POST', path, opts, body);
   };
 }

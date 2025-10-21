@@ -3,7 +3,7 @@
     <bridge-introduction />
     <ClientOnly>
       <bridge-form-data />
+      <TestDemo />
     </ClientOnly>
-    <!-- <TestDemo /> -->
   </div>
 </template>

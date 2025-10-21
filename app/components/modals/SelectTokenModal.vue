@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BridgeChain } from '~/utils/bridge-configs';
+import { cn } from '~/utils/helpers';
 
 const props = defineProps<{
   tokens: BridgeChain['tokens'];

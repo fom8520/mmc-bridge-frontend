@@ -1,9 +1,11 @@
 import {
   Connection,
-  type Keypair,
   PublicKey,
   SystemProgram,
-  type AccountMeta,
+} from '@solana/web3.js';
+import type {
+  Keypair,
+  AccountMeta,
 } from '@solana/web3.js';
 
 import type { SolanaWalletController } from '../controller';
@@ -76,6 +78,11 @@ export class HyperToken {
     },
   ) {
     const connection: Connection = this.connection;
+    console.log({
+      token: param.token,
+      warpRouter: this.hyperToken.toBase58(),
+      mailbox: param.mailbox,
+    });
 
     const hypCollateralAdapter = new SealevelHypCollateralAdapter(
       'solana',
@@ -87,6 +94,13 @@ export class HyperToken {
       },
     );
 
+    console.log({
+      weiAmountOrId: param.amount,
+      destination: this.destination_domain,
+      recipient: param.recipient,
+      fromAccountOwner: param.payer,
+    });
+
     const _tx = await hypCollateralAdapter.populateTransferRemoteTx({
       weiAmountOrId: param.amount,
       destination: this.destination_domain,
@@ -94,12 +108,7 @@ export class HyperToken {
       fromAccountOwner: param.payer,
     });
 
-    // console.log(_tx);
-    // _tx.instructions.forEach((item) => {
-    //   console.log(item.data.toHex());
-    //   console.log(item.keys.map(a => a.pubkey.toBase58()));
-    //   console.log(item.programId.toBase58());
-    // });
+    console.log(_tx);
 
     // const keys = await this.getTransferInstructionKeys({
     //   ...param,
@@ -107,6 +116,14 @@ export class HyperToken {
     //   payer: new PublicKey(param.payer),
     //   uniqueKeypair: Keypair.generate(),
     // });
+
+    // const x = keys[12]!;
+    _tx.instructions.forEach((item) => {
+      console.log(item.data.toHex());
+
+      console.log(item.keys.map(a => a.pubkey.toBase58()));
+      console.log(item.programId.toBase58());
+    });
 
     // console.log(keys.map(a => a.pubkey.toBase58()));
     const sig = await provider.sendTransaction(_tx, connection);

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { shortAddress } from '~/utils/helpers';
+
 withDefaults(defineProps<{
   size?: 'normal' | 'large';
 }>(), { size: 'normal' });
@@ -6,6 +8,7 @@ withDefaults(defineProps<{
 const { fromChain } = useBridgeRemote();
 const { address: mmcAddress, provider } = useMMCWallet();
 const { address: solanaAddress, connectedWallet: solanaConnectedWallet } = useSolanaWallet();
+const { address: evmAddress, walletInfo: evmWalletInfo } = useEvmWallet();
 
 const connectedWallet = computed(() => {
   const _chain = fromChain.value;
@@ -25,6 +28,13 @@ const connectedWallet = computed(() => {
             icon: provider.icon,
           }
         : null;
+    } else if (_chain.type === 'EVM') {
+      return evmAddress.value
+        ? {
+            address: evmAddress.value,
+            icon: evmWalletInfo.value?.icon,
+          }
+        : null;
     }
   }
 
@@ -34,8 +44,13 @@ const connectedWallet = computed(() => {
 function connectWallet() {
   const _chain = fromChain.value;
   const _type = _chain?.type || 'MMC';
-
   useModals().open('ConnectWalletModal', { props: { type: _type as any } });
+
+  // if (_type === 'EVM') {
+  //   evmModal.open();
+  // } else {
+  //   useModals().open('ConnectWalletModal', { props: { type: _type as any } });
+  // }
 }
 </script>
 
@@ -62,6 +77,9 @@ function connectWallet() {
           :key="connectedWallet.icon"
           :src="connectedWallet.icon"
           :size="size === 'normal' ? '3xs' : 'xs'"
+          :ui="{
+            image: 'object-contain rounded-none',
+            root: cn('p-0.5', connectedWallet?.icon ? ' bg-transparent' : '') }"
         />
       </span>
       <span v-if="!connectedWallet">Connect wallet</span>

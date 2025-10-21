@@ -15,6 +15,7 @@ export class MMCRpcApi extends HttpFetch {
     options?: { outputResult?: boolean },
   ): Promise<RpcApiResult<K>> => {
     const path = `/rpc-api/${method}`;
+
     const data = await this.httpPost(path, JSON.stringify(params));
     const result = data.result;
 
@@ -60,6 +61,7 @@ export class MMCRpcApi extends HttpFetch {
     options?: { outputResult?: boolean },
   ): Promise<RpcApiResult<K>> => {
     const param = {
+      params: {},
       ...params,
       id: this.nonce.toString(),
       jsonrpc: this.version,

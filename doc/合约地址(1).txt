@@ -1,0 +1,32 @@
+mmc 合约地址：
+"mailbox": "0x557041803E114d1188F19cc3b6A9408eef611F00"
+"proxyAdmin": "0x6A351B0e7CBB8A3924646811d41630B19513Ba9B"
+"staticMessageIdMultisigIsmFactory": "0x993353aDEB4a91B7bccA8766Db8Ab397508E7d75"
+"validatorAnnounce": "0x9972770b60e77a8eCb3ae4387907f3Efe8Aecf7e"
+"merkleTreeHook":"0xc3E4f4417B4F96632aaE9Cbbc0b94e0Aa794e0C9"
+"HypERC20":"0x0c87367a94a448b521D68236BBD131ed068f0374" // bnb
+"HypERC20":"0xc01841F1477ce63BcC18f3C0536b5DB003317948"//solana
+mmc -> BNB ism: 0x033B581F63687b161344b23053D8951df87F85a3
+mmv -> solana ism：0xa04f5Ae3E366674266f0a06F1BC909684a697012
+
+BNB 测试网合约地址：
+"mailbox": "0xa561ea8925ee32778D42497007f696909C6b3579"
+"merkleTreeHook": "0x55713698db9639101B1463609d7785bA0cC9228f"
+"proxyAdmin": "0x22bd207eea023D45d29395dA1C68Ec283a9a15D6"
+"staticMessageIdMultisigIsmFactory": "0x5A81134643488d30F0A39054aB6BC5087697ac9C"
+"validatorAnnounce": "0xe70b3380D68Fdbd1e083eb6AbA6931831C73CBb9"
+"token":"0x05B8Fd90863803849C9C7dD0FBEeeF8f7873d4f9"
+"HypERC20Collateral":"0x503b896c0d5546a1addBf9dEF7967E5DCf99000f"
+ism: 0xC7d234764Cfb5ed26A112e4FBA8717884a958047
+
+solana devnet 合约地址：
+  "mailbox": "B8U9nh44rHmCgd2ogZwRaaKhZAergY9B8t4JDovVQziS",
+  "validator_announce": "2U2KLwozcuibfYWJLh8w4anpQAKv6BhRW3egrJ4h1MFN",
+  "multisig_ism_message_id": "GbUxpW2mD9hrh2smdFvHYeGN2KNk1D7AKUHCsNJmqSSy",
+  "igp_program_id": "7YAokK9sdubYFJzKy1ndzTnj4MSiCefmq2CuxRMtfHdA",
+  "overhead_igp_account": "GbEjpjbfcXj5AMS6iKTASQq3vanSBHi279p1ejzKj655",
+  "igp_account": "FQDqxiQGyJAL8uxNQSBbbU5J3fp3knWdoPaAXY3FA4p2"
+
+   token地址: vU8i2ezhwScnmUvY2Muip5en2PwwmbzvE46AnAwHZY7
+
+  "HypERC20Collateral":"7yrXzqfoiBouGkZSWA6NfviW2mrmTR1T8LpxmkUw2o1x"  这个是solana跨链的合约
