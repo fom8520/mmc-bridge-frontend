@@ -36,7 +36,6 @@ export function useEvmWallet() {
   const provider = useAppKitProvider<Provider>('eip155');
   const networkData = useAppKitNetwork();
   const { disconnect } = useDisconnect();
-
   const address = computed(() => account.value.address);
   const isConnected = computed(() => account.value.isConnected);
   const walletProvider = computed(() => provider.walletProvider);
@@ -138,6 +137,27 @@ export function useEvmWallet() {
     }
   }
 
+  async function sendTransaction(chainId: number, tx: ethers.providers.TransactionRequest) {
+    if (!isConnected.value) {
+      throw new Error('Wallet is not connected!');
+    }
+
+    const provider = new ethers.providers.Web3Provider(walletProvider.value!);
+    const signer = await provider.getSigner();
+    const gas = await provider.estimateGas({
+      ...tx,
+      from: await signer.getAddress(),
+    });
+    const fee = await provider.getFeeData();
+
+    return signer.sendTransaction({
+      ...tx,
+      gasLimit: gas.mul(120).div(100),
+      maxFeePerGas: fee.maxFeePerGas ?? undefined,
+      maxPriorityFeePerGas: fee.maxPriorityFeePerGas ?? undefined,
+    });
+  }
+
   return {
     modal,
     chainId,
@@ -149,5 +169,6 @@ export function useEvmWallet() {
     addTokenToWallet,
     signMessage,
     switchNetwork,
+    sendTransaction,
   };
 }

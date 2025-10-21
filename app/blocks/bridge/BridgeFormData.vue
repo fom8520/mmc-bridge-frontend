@@ -25,11 +25,13 @@ const formRef = useTemplateRef('form');
 const { data: tokenBalance, status: balanceStatus } = useAsyncData(
   'bridge:token-balance',
   () => {
+    console.log(evmAddress.value);
+
     return getBalance();
   },
   {
     server: false,
-    watch: [fromChain, fromToken, mmcAddress, solanaAddress],
+    watch: [fromChain, fromToken, mmcAddress, solanaAddress, evmAddress],
     deep: true,
   },
 );
@@ -267,6 +269,7 @@ async function onSwap() {
     toast.success('Sent successfully.');
     amount.value = '';
     recipient.value = '';
+    refreshNuxtData();
   } catch (err) {
     if (err instanceof Error) {
       toast.error(err.message);

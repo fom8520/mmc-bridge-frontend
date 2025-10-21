@@ -7,9 +7,14 @@ import { HyperToken } from '~/utils/solana-wallets/contracts/hyperToken';
 import { SolanaApi } from '~/utils/apis/solana-api';
 import { SolanaWalletController } from '~/utils/solana-wallets';
 import type { BridgeChain } from '~/utils/bridge-configs';
+import { EvmApi } from '~/utils/apis/evm-api';
+import { ERC20 } from '~/utils/evm';
 
 export function useBridgeRemote() {
   const { chains } = useBridgeConfig();
+  const { address: evmAddress, walletProvider: evmWalletProvider, switchNetwork } = useEvmWallet();
+  const { rpcApi, address: mmcAddress, provider: mmcProvider } = useMMCWallet();
+  const { address: solanaAddress } = useSolanaWallet();
 
   const fromChain = useState('bridge:from-chain', () => chains[0]);
   const toChain = useState('bridge:to-chain', () => chains[1]);
@@ -24,22 +29,22 @@ export function useBridgeRemote() {
     const _token = fromToken.value;
     const _chain = fromChain.value;
     try {
+      console.log(_chain && _token);
+
       if (_chain && _token) {
         if (_chain.type === 'MMC') {
-          const { rpcApi, address, provider } = useMMCWallet();
-
-          if (!address.value) {
+          if (!mmcAddress.value) {
             return 0n;
           }
-          const pubkey = await provider.getPublicKey();
+          const pubkey = await mmcProvider.getPublicKey();
           console.log(pubkey);
 
           const utxoInfo = await rpcApi.call('GetUtxoDeployerByConAddr', { params: { contractAddr: _token.address } });
           console.log(pubkey, utxoInfo);
 
           const balanceRes = await rpcApi.balanceOf({
-            from: address.value!,
-            to: address.value!,
+            from: mmcAddress.value!,
+            to: mmcAddress.value!,
             token: {
               address: _token.address,
               deployer: utxoInfo.deployer,
@@ -50,19 +55,25 @@ export function useBridgeRemote() {
           console.log(balanceRes);
           return balanceRes;
         } else if (_chain.type === 'Solana') {
-          const { address } = useSolanaWallet();
-          if (!address.value) {
+          if (!solanaAddress.value) {
             return 0n;
           }
           const api = new SolanaApi(_chain.rpc);
-          console.log(address.value, _token.address);
+          console.log(solanaAddress.value, _token.address);
 
           const balanceRes = await api.getBalance({
-            address: address.value,
+            address: solanaAddress.value,
             contract: _token.address,
           });
           console.log(balanceRes);
           return balanceRes;
+        } else if (_chain.type === 'EVM') {
+          if (!evmAddress.value) {
+            return 0n;
+          }
+          const api = new EvmApi(_chain.rpc);
+
+          return api.balanceOf(evmAddress.value, _token.address); ;
         }
       }
 
@@ -75,21 +86,19 @@ export function useBridgeRemote() {
   }
 
   async function transferMmcToAll(_recipient: string) {
-    const { rpcApi, address, provider: mmcProvider } = useMMCWallet();
-
     try {
-      if (!address.value) {
+      if (!mmcAddress.value) {
         return;
       }
 
       const _mmcChain = fromChain.value;
       const _fromToken = fromToken.value;
-      const _solanaChain = toChain.value;
+      const _toChain = toChain.value;
 
-      if (!_fromToken || !_solanaChain || !_mmcChain) {
+      if (!_fromToken || !_toChain || !_mmcChain) {
         return;
       }
-      const _config = _fromToken.contract[_solanaChain.value];
+      const _config = _fromToken.contract[_toChain.value];
 
       if (!_config) {
         return;
@@ -100,8 +109,8 @@ export function useBridgeRemote() {
 
       const pubkey = await mmcProvider.getPublicKey();
 
-      const txData = await hyperErc20.transferRemote({
-        destination: _solanaChain.id.toString(),
+      const txData = await hyperErc20.populateTransferRemote({
+        destination: _toChain.id.toString(),
         recipient: _recipient,
         amountOrId: _amount,
       });
@@ -110,14 +119,14 @@ export function useBridgeRemote() {
       const utxoInfo = await rpcApi.call('GetUtxoDeployerByConAddr', { params: { contractAddr: hyperErc20.address } });
 
       const params = {
-        addr: address.value,
+        addr: mmcAddress.value,
         args: txData!.data!,
         contractAddress: hyperErc20.address,
         deployer: utxoInfo.deployer,
         deployutxo: utxoInfo.utxo,
         isGasTrade: true,
         gasTrade: [
-          address.value,
+          mmcAddress.value,
           // 'Vote',
           '0x5b0a968d45eb5e13318e4580dcff1d44f945c3cd299f1d38612cf46f71920d07',
         ],
@@ -127,7 +136,7 @@ export function useBridgeRemote() {
         pubstr: pubkey,
         tip: '0',
         txInfo: 'info',
-        sleeptime: '5',
+        sleeptime: '3',
       };
 
       const txRes = await mmcProvider.sendTransaction({
@@ -192,6 +201,51 @@ export function useBridgeRemote() {
     }
   }
 
+  async function transferEvmToAll(_recipient: string) {
+    try {
+      if (!evmAddress.value) {
+        return;
+      }
+
+      const _fromChain = fromChain.value;
+      const _fromToken = fromToken.value;
+      const _toChain = toChain.value;
+      if (!_fromToken || !_fromChain || !_toChain) {
+        return;
+      }
+      const _config = _fromToken.contract[_toChain.value];
+      if (!_config) {
+        return;
+      }
+      await switchNetwork(_fromChain.id);
+
+      const _provider = new ethers.providers.Web3Provider(evmWalletProvider.value!);
+      const _amount = ethers.utils.parseUnits(amount.value, _fromToken.decimals).toBigInt();
+      const erc20 = new ERC20(_fromToken.address, _fromChain.rpc);
+      const hyperErc20 = new HyperERC20Collateral(_config.hyperTokenCollateral, _fromChain.rpc);
+
+      await erc20.approve(_provider, {
+        approvedAddress: hyperErc20.address,
+        address: evmAddress.value,
+        amount: _amount,
+      });
+
+      const res = await hyperErc20.transferRemote(
+        _provider,
+        {
+          destination: _toChain.id.toString(),
+          recipient: _recipient,
+          amountOrId: _amount,
+        },
+      );
+
+      return res;
+    } catch (err) {
+      console.log(err);
+      throw errorHandling(err);
+    }
+  }
+
   function solanaBridge() {
     const _toChain = toChain.value;
 
@@ -213,8 +267,31 @@ export function useBridgeRemote() {
 
       return transferMmcToAll(`0x${solAddr}`);
     } else if (_toChain?.type === 'EVM') {
-      if (ethers.utils.isAddress(recipient.value))
-        return transferMmcToAll(ethers.utils.hexZeroPad(recipient.value, 32));
+      if (!ethers.utils.isAddress(recipient.value)) {
+        throw new Error('Please enter the correct EVM recipient address.');
+      }
+      return transferMmcToAll(ethers.utils.hexZeroPad(recipient.value, 32));
+    }
+  }
+
+  function evmBridge() {
+    const _toChain = toChain.value;
+    console.log(_toChain?.type);
+
+    if (_toChain?.type === 'Solana') {
+      if (!SolanaWalletController.isValidSolanaAddress(recipient.value)) {
+        throw new Error('Please enter the correct Solana recipient address.');
+      }
+      const solAddr = new PublicKey(recipient.value)
+        .toBuffer()
+        .toString('hex');
+
+      return transferEvmToAll(`0x${solAddr}`);
+    } else if (['EVM', 'MMC'].includes(_toChain?.type || '')) {
+      if (!ethers.utils.isAddress(recipient.value)) {
+        throw new Error('Please enter the correct EVM/MMC recipient address.');
+      }
+      return transferEvmToAll(ethers.utils.hexZeroPad(recipient.value, 32));
     }
   }
 
@@ -225,6 +302,8 @@ export function useBridgeRemote() {
       return solanaBridge();
     } else if (_fromChain?.type === 'MMC') {
       return mmcBridge();
+    } else if (_fromChain?.type === 'EVM') {
+      return evmBridge();
     }
   }
 

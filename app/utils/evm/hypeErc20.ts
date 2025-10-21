@@ -31,16 +31,24 @@ type ParamsFor<N extends FunctionNames> = Extract<
   : [];
 
 export class HyperERC20Collateral {
-  constructor(address: string) {
+  constructor(address: string, rpc?: string) {
     this.address = address;
+    this.rpc = rpc;
   }
 
   address!: string;
-
+  rpc?: string;
   static ABI = Hyper_ERC20_ABI;
 
+  get rpcProvider() {
+    if (!this.rpc) {
+      return;
+    }
+    return new ethers.providers.JsonRpcProvider(this.rpc);
+  }
+
   get contractProvider() {
-    return new Contract(this.address, Hyper_ERC20_ABI);
+    return new Contract(this.address, Hyper_ERC20_ABI, this.rpcProvider);
   }
 
   getFunction<N extends FunctionNames>(name: N, ...params: ParamsFor<N>) {
@@ -58,6 +66,10 @@ export class HyperERC20Collateral {
     }
   }
 
+  populateTransferRemote(param: { destination: string; recipient: string; amountOrId: bigint }) {
+    return this.getFunction('transferRemote', ...[param.destination, param.recipient, param.amountOrId]);
+  }
+
   /**
      *
      * @param param
@@ -66,7 +78,19 @@ export class HyperERC20Collateral {
      * @param param.amountOrId transfer amount
      * @returns
      */
-  transferRemote(param: { destination: string; recipient: string; amountOrId: bigint }) {
-    return this.getFunction('transferRemote', ...[param.destination, param.recipient, param.amountOrId]);
+  async transferRemote(provider: ethers.providers.Web3Provider, param: { destination: string; recipient: string; amountOrId: bigint }) {
+    // const tx = await this.populateTransferRemote(param);\
+    const signer = provider.getSigner();
+    console.log(signer);
+
+    const a = await signer.getAddress();
+    const b = await signer.getBalance();
+    console.log(a, b);
+
+    console.log(this.address, param.destination, param.recipient, param.amountOrId);
+
+    const _contractProvider = new ethers.Contract(this.address, Hyper_ERC20_ABI, signer);
+
+    return _contractProvider.transferRemote(param.destination, param.recipient, param.amountOrId);
   }
 }
