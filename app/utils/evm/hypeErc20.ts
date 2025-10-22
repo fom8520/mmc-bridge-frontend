@@ -79,16 +79,7 @@ export class HyperERC20Collateral {
      * @returns
      */
   async transferRemote(provider: ethers.providers.Web3Provider, param: { destination: string; recipient: string; amountOrId: bigint }) {
-    // const tx = await this.populateTransferRemote(param);\
     const signer = provider.getSigner();
-    console.log(signer);
-
-    const a = await signer.getAddress();
-    const b = await signer.getBalance();
-    console.log(a, b);
-
-    console.log(this.address, param.destination, param.recipient, param.amountOrId);
-
     const _contractProvider = new ethers.Contract(this.address, Hyper_ERC20_ABI, signer);
 
     return _contractProvider.transferRemote(param.destination, param.recipient, param.amountOrId);

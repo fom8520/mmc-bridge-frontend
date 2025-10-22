@@ -24,24 +24,19 @@ export function useBridgeRemote() {
   );
   const amount = useState('bridge:amount', () => '');
   const recipient = useState('bridge:recipient', () => '');
+  const payGasType = useState('bridge:mmc-gastype', () => 'Vote'); // mmc
 
   async function getBalance() {
     const _token = fromToken.value;
     const _chain = fromChain.value;
     try {
-      console.log(_chain && _token);
-
       if (_chain && _token) {
         if (_chain.type === 'MMC') {
           if (!mmcAddress.value) {
             return 0n;
           }
           const pubkey = await mmcProvider.getPublicKey();
-          console.log(pubkey);
-
           const utxoInfo = await rpcApi.call('GetUtxoDeployerByConAddr', { params: { contractAddr: _token.address } });
-          console.log(pubkey, utxoInfo);
-
           const balanceRes = await rpcApi.balanceOf({
             from: mmcAddress.value!,
             to: mmcAddress.value!,
@@ -52,20 +47,18 @@ export function useBridgeRemote() {
             } as any,
             pubkey,
           });
-          console.log(balanceRes);
+
           return balanceRes;
         } else if (_chain.type === 'Solana') {
           if (!solanaAddress.value) {
             return 0n;
           }
           const api = new SolanaApi(_chain.rpc);
-          console.log(solanaAddress.value, _token.address);
-
           const balanceRes = await api.getBalance({
             address: solanaAddress.value,
             contract: _token.address,
           });
-          console.log(balanceRes);
+
           return balanceRes;
         } else if (_chain.type === 'EVM') {
           if (!evmAddress.value) {
@@ -78,9 +71,7 @@ export function useBridgeRemote() {
       }
 
       return 0n;
-    } catch (err) {
-      console.log(err);
-
+    } catch {
       return 0n;
     }
   }
@@ -114,8 +105,6 @@ export function useBridgeRemote() {
         recipient: _recipient,
         amountOrId: _amount,
       });
-      console.log(txData);
-
       const utxoInfo = await rpcApi.call('GetUtxoDeployerByConAddr', { params: { contractAddr: hyperErc20.address } });
 
       const params = {
@@ -124,11 +113,12 @@ export function useBridgeRemote() {
         contractAddress: hyperErc20.address,
         deployer: utxoInfo.deployer,
         deployutxo: utxoInfo.utxo,
-        isGasTrade: true,
+        isGasTrade: payGasType.value !== 'Vote',
         gasTrade: [
           mmcAddress.value,
           // 'Vote',
-          '0x5b0a968d45eb5e13318e4580dcff1d44f945c3cd299f1d38612cf46f71920d07',
+          // '0x5b0a968d45eb5e13318e4580dcff1d44f945c3cd299f1d38612cf46f71920d07',
+          payGasType.value,
         ],
         isFindUtxo: false,
         istochain: 'true',
@@ -295,6 +285,63 @@ export function useBridgeRemote() {
     }
   }
 
+  async function estimatedGas() {
+    if (!mmcAddress.value) {
+      return 0n;
+    }
+    const _mmcChain = fromChain.value;
+    const _fromToken = fromToken.value;
+    const _toChain = toChain.value;
+
+    if (!_fromToken || !_toChain || !_mmcChain) {
+      return;
+    }
+    const _config = _fromToken.contract[_toChain.value];
+
+    if (!_config) {
+      return;
+    }
+    const hyperErc20 = new HyperERC20Collateral(_config.hyperTokenCollateral);
+    const _amount = ethers.utils.parseUnits(amount.value || '0', _fromToken.decimals).toBigInt();
+
+    const pubkey = await mmcProvider.getPublicKey();
+    const txData = await hyperErc20.populateTransferRemote({
+      destination: _toChain.id.toString(),
+      recipient: ethers.utils.hexZeroPad('0x3F2344a079608c02CE317A3F27d76f854a7dD5A5', 32),
+      amountOrId: _amount,
+    });
+
+    const utxoInfo = await rpcApi.call('GetUtxoDeployerByConAddr', { params: { contractAddr: hyperErc20.address } });
+
+    const params = {
+      addr: mmcAddress.value,
+      args: txData!.data!,
+      contractAddress: hyperErc20.address,
+      deployer: utxoInfo.deployer,
+      deployutxo: utxoInfo.utxo,
+      isGasTrade: payGasType.value !== 'Vote',
+      gasTrade: [
+        mmcAddress.value,
+        // 'Vote',
+        // '0x5b0a968d45eb5e13318e4580dcff1d44f945c3cd299f1d38612cf46f71920d07',
+        payGasType.value,
+      ],
+      isFindUtxo: false,
+      istochain: 'true',
+      money: '0',
+      pubstr: pubkey,
+      tip: '0',
+      txInfo: 'info',
+      sleeptime: '3',
+    };
+    const res = await rpcApi.estimatedGas('CreateCallContractTransaction', {
+      method: 'CreateCallContractTransaction',
+      params: params,
+    });
+    console.log(res);
+    return res;
+  }
+
   function swap() {
     const _fromChain = fromChain.value;
 
@@ -314,9 +361,11 @@ export function useBridgeRemote() {
     fromToken,
     amount,
     recipient,
+    payGasType,
 
-    getBalance,
     swap,
+    estimatedGas,
+    getBalance,
     transferMmcToSolana: transferMmcToAll,
     transferMmcToAll,
     transferSolanaToMmc: transferSolanaToEvm,

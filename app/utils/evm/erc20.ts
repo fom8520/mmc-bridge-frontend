@@ -108,7 +108,12 @@ export class ERC20 {
 
     await res.wait();
     await this.rpcProvider?.waitForTransaction(res.hash);
-
+    // waiting
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true);
+      }, 2000);
+    });
     const _isApprove = await this.allowanceToTokenSelf(param.address, param.approvedAddress, param.amount);
 
     if (!isApprove) {

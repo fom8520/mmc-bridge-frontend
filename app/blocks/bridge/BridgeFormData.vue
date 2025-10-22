@@ -16,7 +16,7 @@ const {
   swap,
 } = useBridgeRemote();
 
-const { address: mmcAddress, rpcApi } = useMMCWallet();
+const { address: mmcAddress } = useMMCWallet();
 const { address: solanaAddress } = useSolanaWallet();
 const { address: evmAddress } = useEvmWallet();
 
@@ -25,8 +25,6 @@ const formRef = useTemplateRef('form');
 const { data: tokenBalance, status: balanceStatus } = useAsyncData(
   'bridge:token-balance',
   () => {
-    console.log(evmAddress.value);
-
     return getBalance();
   },
   {
@@ -284,17 +282,6 @@ watch(tokenBalance, () => {
     formRef.value?.validate({ name: ['amount'] });
   }
 });
-
-onMounted(() => {
-  rpcApi.call('GetBlockByHeight', {
-    params: {
-      beginHeight: '1',
-      endHeight: '2',
-    },
-  }).then((res) => {
-    console.log(res);
-  });
-});
 </script>
 
 <template>
@@ -500,6 +487,8 @@ onMounted(() => {
             </template>
           </UInput>
         </UFormField>
+
+        <BridgeGasSelector v-if="fromChain?.type === 'MMC'" />
       </UForm>
 
       <div class="w-full pt-6 mt-0.5 flex justify-center">

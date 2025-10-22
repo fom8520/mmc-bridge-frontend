@@ -32,6 +32,7 @@ withDefaults(defineProps<{
         <UIcon
           name="i-tdesign-loading"
           class=" animate-spin"
+          :class="{ '': size==='normal', 'w-5 h-5': size === 'large' }"
         />
       </span>
       <span v-else>
