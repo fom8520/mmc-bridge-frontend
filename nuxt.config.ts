@@ -98,9 +98,18 @@ export default defineNuxtConfig({
   // },
   hooks: {
     'vite:extendConfig'(config, { isClient }) {
+      // if (isClient) {
+      //   config.plugins = config.plugins || [];
+      //   config.plugins.push(nodePolyfills({ globals: { Buffer: true } }));
+      // }
+
       if (isClient) {
         config.plugins = config.plugins || [];
-        config.plugins.push(nodePolyfills({ globals: { Buffer: true } }));
+        config.plugins.push(nodePolyfills({
+          include: ['buffer'], // ✅ 只 polyfill buffer
+          exclude: ['crypto', 'stream', 'path', 'fs', 'util', 'process'],
+          globals: { Buffer: true },
+        }));
       }
     },
   },

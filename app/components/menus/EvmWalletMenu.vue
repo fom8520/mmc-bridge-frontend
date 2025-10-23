@@ -40,7 +40,7 @@ async function onConnect() {
     <div
       v-for="wallet in wallets"
       :key="wallet.label"
-      class="cursor-pointer rounded-lg select-none border-1 border-primary-800 p-2.5"
+      class="cursor-pointer rounded-lg select-none border border-primary-800 p-2.5"
       :class="{ ' bg-primary-800/20': !!address }"
     >
       <div

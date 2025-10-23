@@ -3,12 +3,10 @@ import type {
   TransactionOrVersionedTransaction,
 } from '@solana/wallet-adapter-base';
 import {
-  WalletReadyState,
   WalletSignMessageError,
   WalletSignTransactionError, WalletAdapterNetwork,
 } from '@solana/wallet-adapter-base';
-import type { SolanaWalletType } from './types';
-import { SOLANA_CHAIN_IDS, walletsAdapter } from './utils';
+import { SOLANA_CHAIN_IDS, getSolanaWallets } from './utils';
 import {
   PublicKey,
   type Connection,
@@ -16,32 +14,29 @@ import {
   type TransactionSignature,
   type VersionedTransaction,
 } from '@solana/web3.js';
+import type { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
+import type { OkxWalletAdapter, PhantomWalletAdapter } from './adapters';
 
-const walletObj: any = {};
-
-for (const k of Object.keys(walletsAdapter) as SolanaWalletType[]) {
-  const adapterCtor = walletsAdapter[k];
-  const p = new adapterCtor();
-  if (p.readyState === WalletReadyState.Installed) {
-    walletObj[k] = p as InstanceType<typeof adapterCtor>;
-  }
-}
-
+type WalletAdapter = SolflareWalletAdapter | PhantomWalletAdapter | OkxWalletAdapter;
 export class SolanaWalletController {
-  id!: SolanaWalletType;
+  name!: string;
+  provider!: WalletAdapter;
 
-  constructor(id: SolanaWalletType) {
-    this.id = id;
+  constructor(_provider: WalletAdapter) {
+    this.name = _provider.name;
+    this.provider = _provider;
   }
 
-  static solanaWallets: {
-    [key in SolanaWalletType]: InstanceType<(typeof walletsAdapter)[key]>;
-  } = walletObj;
+  // static solanaWallets: {
+  //   [key in SolanaWalletType]: InstanceType<(typeof walletsAdapter)[key]>;
+  // } = walletObj;
 
-  static get wallets() {
-    return (
-      Object.keys(SolanaWalletController.solanaWallets) as SolanaWalletType[]
-    ).map(k => new SolanaWalletController(k));
+  static wallets(): SolanaWalletController[] {
+    const _wallets = getSolanaWallets();
+
+    return _wallets.map((item) => {
+      return new SolanaWalletController(new item());
+    });
   }
 
   static isValidSolanaAddress(address: string): boolean {
@@ -65,12 +60,6 @@ export class SolanaWalletController {
       default:// 1399811149
         return WalletAdapterNetwork.Devnet;
     }
-  }
-
-  get provider() {
-    const p = SolanaWalletController.solanaWallets[this.id];
-
-    return p;
   }
 
   get connected() {

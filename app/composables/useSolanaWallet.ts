@@ -1,12 +1,12 @@
 import { useStorage } from '@vueuse/core';
 import { SolanaWalletController } from '~/utils/solana-wallets';
-import type { SolanaWalletType } from '~/utils/solana-wallets';
 
 let isInit = false;
-const wallets = SolanaWalletController.wallets;
 
 export function useSolanaWallet() {
-  const connectedWalletId = useStorage<SolanaWalletType>(
+  const wallets = import.meta.client ? SolanaWalletController.wallets() : [];
+
+  const connectedWalletId = useStorage<string>(
     'connect-solana-wallet',
     null,
   );
@@ -21,14 +21,14 @@ export function useSolanaWallet() {
     () => null,
   );
 
-  async function connectWallet(id: SolanaWalletType) {
-    if (connectedWalletId.value === id && address.value) {
+  async function connectWallet(name: string) {
+    if (connectedWalletId.value === name && address.value) {
       return;
     } else if (address.value) {
       await disconnectWallet();
     }
 
-    const wallet = wallets.find(item => item.id === id)!;
+    const wallet = wallets.find(item => item.name === name)!;
 
     wallet.onChangeAccounts((pubkey) => {
       address.value = pubkey.toBase58();
@@ -39,7 +39,7 @@ export function useSolanaWallet() {
 
     try {
       await wallet.connect();
-      connectedWalletId.value = id;
+      connectedWalletId.value = name;
       connectedWallet.value = wallet;
     } catch (err) {
       wallet.off('connect');

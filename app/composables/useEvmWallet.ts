@@ -9,27 +9,27 @@ const metadata = walletConfig.metadata;
 
 let isInit = false;
 
+if (!isInit) {
+  // Create a AppKit instance
+  createAppKit({
+    projectId: walletConfig.projectId,
+    metadata,
+    adapters: [new Ethers5Adapter()],
+    networks: [bsc, bscTestnet],
+    features: {
+      analytics: false,
+      email: false,
+      socials: false,
+      swaps: false,
+      send: false,
+    },
+  });
+
+  isInit = true;
+}
+
 export function useEvmWallet() {
   const { chains } = useBridgeConfig();
-
-  if (!isInit) {
-    // Create a AppKit instance
-    createAppKit({
-      projectId: walletConfig.projectId,
-      metadata,
-      adapters: [new Ethers5Adapter()],
-      networks: [bsc, bscTestnet],
-      features: {
-        analytics: false,
-        email: false,
-        socials: false,
-        swaps: false,
-        send: false,
-      },
-    });
-
-    isInit = true;
-  }
 
   const modal = useAppKit();
   const account = useAppKitAccount({ namespace: 'eip155' });

@@ -260,7 +260,6 @@ const swapping = ref(false);
 async function onSwap() {
   try {
     swapping.value = true;
-    await formRef.value?.submit();
     const res = await swap();
     console.log(res);
 
@@ -291,6 +290,7 @@ watch(tokenBalance, () => {
         ref="form"
         :state="formValues"
         :schema="schema"
+        @submit="onSwap"
       >
         <div class="w-full flex justify-between items-center space-x-6">
           <UFormField
@@ -475,6 +475,7 @@ watch(tokenBalance, () => {
             v-model:model-value="recipient"
             :placeholder="recipientPlaceholder"
             class="w-full"
+            type="text"
           >
             <template #trailing>
               <UButton
@@ -489,26 +490,26 @@ watch(tokenBalance, () => {
         </UFormField>
 
         <BridgeGasSelector v-if="fromChain?.type === 'MMC'" />
-      </UForm>
 
-      <div class="w-full pt-6 mt-0.5 flex justify-center">
-        <div class="w-2/3">
-          <ConnectWallet
-            v-if="!connectedWallet"
-            class="w-full"
-            :size="'large'"
-          />
-          <PrimaryButton
-            v-else
-            :loading="swapping"
-            class="w-full"
-            size="large"
-            @click="onSwap"
-          >
-            <span>Swap</span>
-          </PrimaryButton>
+        <div class="w-full pt-6 mt-0.5 flex justify-center">
+          <div class="w-2/3">
+            <ConnectWallet
+              v-if="!connectedWallet"
+              class="w-full"
+              :size="'large'"
+            />
+            <PrimaryButton
+              v-else
+              :loading="swapping"
+              class="w-full"
+              size="large"
+              type="submit"
+            >
+              <span>Swap</span>
+            </PrimaryButton>
+          </div>
         </div>
-      </div>
+      </UForm>
     </div>
   </div>
 </template>

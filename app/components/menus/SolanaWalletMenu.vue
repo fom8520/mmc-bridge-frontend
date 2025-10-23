@@ -1,10 +1,7 @@
 <script lang="ts" setup>
 import { toast } from 'vue-sonner';
 import { useSolanaWallet } from '~/composables/useSolanaWallet';
-import type {
-  SolanaWalletController,
-  SolanaWalletType,
-} from '~/utils/solana-wallets';
+import type { SolanaWalletController } from '~/utils/solana-wallets';
 
 const emits = defineEmits<{
   (e: 'finish', val: 'connect' | 'disconnect'): void;
@@ -13,14 +10,14 @@ const emits = defineEmits<{
 const { wallets, connectWallet, disconnectWallet, connectedWallet, address }
   = useSolanaWallet();
 
-const connectingId = ref<SolanaWalletType>();
+const connectingId = ref<string>();
 const onConnect = async (wallet: SolanaWalletController) => {
   if (connectingId.value) {
     return;
   }
   try {
-    connectingId.value = wallet.id;
-    await connectWallet(wallet.id);
+    connectingId.value = wallet.name;
+    await connectWallet(wallet.name);
     emits('finish', 'connect');
   } catch (err) {
     if (err instanceof Error) {
@@ -56,8 +53,8 @@ const onCopy = async () => {
     <div
       v-for="wallet in wallets"
       :key="wallet.label"
-      class="cursor-pointer rounded-lg select-none border-1 border-primary-800 p-2.5"
-      :class="{ ' bg-primary-800/20': connectedWallet?.id === wallet.id }"
+      class="cursor-pointer rounded-lg select-none border border-primary-800 p-2.5"
+      :class="{ ' bg-primary-800/20': connectedWallet?.name === wallet.name }"
     >
       <div
         class="w-full flex flex-col items-center relative"
@@ -83,7 +80,7 @@ const onCopy = async () => {
         >
           <span class=" text-md font-normal text-primary">{{ wallet.label }}</span>
           <div
-            v-if="wallet.id === connectedWallet?.id && address"
+            v-if="wallet.name === connectedWallet?.name && address"
             class="w-full text-xs font-normal flex pt-2.5"
           >
             <div>{{ shortAddress(address) }}</div>
@@ -115,7 +112,7 @@ const onCopy = async () => {
           </div>
         </div>
         <div
-          v-if="wallet.id === connectingId && connectingId"
+          v-if="wallet.name === connectingId && connectingId"
           class=" absolute w-full h-full flex items-center justify-center backdrop-blur-lg "
         >
           <UIcon
