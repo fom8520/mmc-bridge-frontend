@@ -42,8 +42,10 @@ export type SendTransactionParams = {
 
 export class StarProvider {
   constructor() {
-    const provider = (window as any)?.starLink as any;
-    this.provider = provider;
+    if (import.meta.client) {
+      const provider = (window as any)?.starLink as any;
+      this.provider = provider;
+    }
   }
 
   provider: any;

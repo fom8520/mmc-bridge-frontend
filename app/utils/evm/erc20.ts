@@ -114,12 +114,14 @@ export class ERC20 {
         resolve(true);
       }, 2000);
     });
-    const _isApprove = await this.allowanceToTokenSelf(param.address, param.approvedAddress, param.amount);
 
-    if (!isApprove) {
-      throw new Error('Allowance exceeded');
-    }
+    // const _isApprove = await this.allowanceToTokenSelf(param.address, param.approvedAddress, param.amount);
+    // console.log(isApprove);
 
-    return _isApprove;
+    // if (!isApprove) {
+    //   throw new Error('Allowance exceeded');
+    // }
+
+    return true;
   }
 }

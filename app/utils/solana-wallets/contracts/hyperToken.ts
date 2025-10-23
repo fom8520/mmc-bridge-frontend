@@ -27,7 +27,7 @@ import {
 } from './process';
 import { SPL_NOOP_PROGRAM_ID } from './common';
 
-export class HyperToken {
+export class HyperTokenCollateral {
   constructor(
     hyperToken: string,
     args: {

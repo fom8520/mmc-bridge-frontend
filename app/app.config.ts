@@ -27,10 +27,6 @@ export default defineAppConfig({
             'width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1',
         },
         {
-          name: 'apple-mobile-web-app-capable',
-          content: 'yes',
-        },
-        {
           name: 'apple-mobile-web-app-title',
           content: displayName,
         },

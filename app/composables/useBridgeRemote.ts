@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 // // import { ERC20 } from '~/utils/evm';
 import { HyperERC20Collateral } from '~/utils/evm/hypeErc20';
 // // import { MAX_INTEGER } from '~/utils/common';
-import { HyperToken } from '~/utils/solana-wallets/contracts/hyperToken';
+import { HyperTokenCollateral } from '~/utils/solana-wallets/contracts/hyperToken';
 import { SolanaApi } from '~/utils/apis/solana-api';
 import { SolanaWalletController } from '~/utils/solana-wallets';
 import type { BridgeChain } from '~/utils/bridge-configs';
@@ -163,7 +163,7 @@ export function useBridgeRemote() {
     }
 
     try {
-      const hyperToken = new HyperToken(_config.hyperTokenCollateral, {
+      const hyperToken = new HyperTokenCollateral(_config.hyperTokenCollateral, {
         rpc: _solanaChain.rpc,
         network: SolanaWalletController.requestSolanaNetworkType(_solanaChain.id),
         chainId: _solanaChain.id,

@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
   ],
   plugins: [],
-  ssr: false,
+  ssr: true,
   components: [
     {
       path: '~/components',
@@ -25,7 +25,7 @@ export default defineNuxtConfig({
     },
   ],
   imports: { autoImport: true },
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   app: {
     head: {
       title: displayName,
@@ -35,10 +35,6 @@ export default defineNuxtConfig({
           name: 'viewport',
           content:
             'width=device-width,initial-scale=1.0,user-scalable=no,minimum-scale=1,maximum-scale=1',
-        },
-        {
-          name: 'apple-mobile-web-app-capable',
-          content: 'yes',
         },
         {
           name: 'apple-mobile-web-app-title',
@@ -68,12 +64,27 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/css/main.css'],
   ui: { colorMode: false },
-  routeRules: { '/rpc-api/**': { proxy: 'http://222.128.23.254:23134/**' } },
+  spaLoadingTemplate: './spa-loading-template.html',
+  // build: {
+  //   transpile: [
+  //     (ctx) => {
+  //       return ctx.isDev ? false : 'jayson';
+  //     },
+  //   ],
+  // },
+  routeRules: {
+    '/': { ssr: false },
+    '/rpc-api/**': { proxy: 'http://222.128.23.254:23134/**' },
+    '/images/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/fonts/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/chain/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+  },
 
   devServer: {
     port: 3185,
     host: '0.0.0.0',
   },
+  future: { compatibilityVersion: 4 },
   compatibilityDate: '2025-07-15',
   // nitro: {
   //   compressPublicAssets: false,

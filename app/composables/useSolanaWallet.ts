@@ -3,10 +3,9 @@ import { SolanaWalletController } from '~/utils/solana-wallets';
 import type { SolanaWalletType } from '~/utils/solana-wallets';
 
 let isInit = false;
+const wallets = SolanaWalletController.wallets;
 
 export function useSolanaWallet() {
-  const wallets = SolanaWalletController.wallets;
-
   const connectedWalletId = useStorage<SolanaWalletType>(
     'connect-solana-wallet',
     null,
