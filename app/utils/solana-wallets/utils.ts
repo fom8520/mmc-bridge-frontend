@@ -1,6 +1,6 @@
 import { PhantomWalletAdapter, OkxWalletAdapter } from './adapters';
 import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
-import { WalletAdapterNetwork, WalletReadyState } from '@solana/wallet-adapter-base';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
 export const SOLANA_CHAIN_IDS = {
   [WalletAdapterNetwork.Devnet]: 741852,
@@ -8,10 +8,11 @@ export const SOLANA_CHAIN_IDS = {
 };
 
 export function getSolanaWallets() {
-  return [SolflareWalletAdapter, PhantomWalletAdapter, OkxWalletAdapter].filter((item) => {
-    const adapterCtor = item;
-    const p = new adapterCtor();
+  return [SolflareWalletAdapter, PhantomWalletAdapter, OkxWalletAdapter];
+  //   .filter((item) => {
+  //   const adapterCtor = item;
+  //   const p = new adapterCtor();
 
-    return p.readyState === WalletReadyState.Installed;
-  });
+  //   return p.readyState === WalletReadyState.Installed;
+  // });
 }

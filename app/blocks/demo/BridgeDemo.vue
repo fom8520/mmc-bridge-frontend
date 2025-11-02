@@ -8,7 +8,7 @@ async function onBridge(type: 'mmc' | 'sol') {
   try {
     confirming.value = type;
     if (type === 'mmc') {
-      await transferMmcToSolana();
+      await transferMmcToSolana('0x');
     } else {
       await transferSolanaToMmc();
     }

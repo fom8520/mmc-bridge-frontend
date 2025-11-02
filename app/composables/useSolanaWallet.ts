@@ -13,7 +13,7 @@ export function useSolanaWallet() {
 
   const automaticallyConnected = useState(
     'solana:automaticallyConnected',
-    () => false,
+    () => true,
   );
   const address = useState<null | string>('solana:address', () => null);
   const connectedWallet = useState<null | SolanaWalletController>(
@@ -30,20 +30,21 @@ export function useSolanaWallet() {
 
     const wallet = wallets.find(item => item.name === name)!;
 
-    wallet.onChangeAccounts((pubkey) => {
-      address.value = pubkey.toBase58();
-    });
-    wallet.onDisconnect(() => {
-      disconnectWallet();
-    });
-
     try {
+      wallet.onChangeAccounts((pubkey) => {
+        address.value = pubkey.toBase58();
+      });
+      wallet.onDisconnect(() => {
+        disconnectWallet();
+      });
       await wallet.connect();
       connectedWalletId.value = name;
       connectedWallet.value = wallet;
     } catch (err) {
       wallet.off('connect');
       wallet.off('disconnect');
+      connectedWalletId.value = null;
+      connectedWallet.value = null;
       throw err;
     }
   }
@@ -57,7 +58,7 @@ export function useSolanaWallet() {
 
   onMounted(() => {
     if (import.meta.client && !isInit) {
-      if (connectedWalletId.value && !automaticallyConnected.value) {
+      if (connectedWalletId.value && automaticallyConnected.value) {
         connectWallet(connectedWalletId.value);
         isInit = true;
       }

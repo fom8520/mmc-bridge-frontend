@@ -84,7 +84,6 @@ export default defineNuxtConfig({
     port: 3185,
     host: '0.0.0.0',
   },
-  future: { compatibilityVersion: 4 },
   compatibilityDate: '2025-07-15',
   // nitro: {
   //   compressPublicAssets: false,
@@ -106,7 +105,7 @@ export default defineNuxtConfig({
       if (isClient) {
         config.plugins = config.plugins || [];
         config.plugins.push(nodePolyfills({
-          include: ['buffer'], // ✅ 只 polyfill buffer
+          include: ['buffer'], // ✅ polyfill buffer
           exclude: ['crypto', 'stream', 'path', 'fs', 'util', 'process'],
           globals: { Buffer: true },
         }));

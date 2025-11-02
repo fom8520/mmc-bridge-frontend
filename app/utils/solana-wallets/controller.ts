@@ -5,6 +5,8 @@ import type {
 import {
   WalletSignMessageError,
   WalletSignTransactionError, WalletAdapterNetwork,
+  WalletNotReadyError,
+  WalletError,
 } from '@solana/wallet-adapter-base';
 import { SOLANA_CHAIN_IDS, getSolanaWallets } from './utils';
 import {
@@ -16,6 +18,7 @@ import {
 } from '@solana/web3.js';
 import type { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
 import type { OkxWalletAdapter, PhantomWalletAdapter } from './adapters';
+import errorInfos from './error';
 
 type WalletAdapter = SolflareWalletAdapter | PhantomWalletAdapter | OkxWalletAdapter;
 export class SolanaWalletController {
@@ -98,8 +101,20 @@ export class SolanaWalletController {
     this.provider.off(event);
   }
 
-  connect(): Promise<void> {
-    return this.provider?.connect();
+  async connect(): Promise<void> {
+    try {
+      return await this.provider?.connect();
+    } catch (err) {
+      if (err instanceof WalletError) {
+        if (err instanceof WalletNotReadyError) {
+          window.open(this.provider.url, '_black');
+        }
+
+        const name = err.name as keyof typeof errorInfos;
+        throw new Error(errorInfos[name].message);
+      }
+      throw err;
+    }
   }
 
   disconnect(): Promise<void> {
