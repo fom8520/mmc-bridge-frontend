@@ -5,7 +5,7 @@ export const mmc_testnet = {
   id: 987456123,
   symbol: 'MMC',
   icon: '/chain/mmc.svg',
-  rpc: 'http://222.128.23.254:23134',
+  rpc: 'http://222.128.23.254:13134',
   network: 'Testnet',
   explorer: '',
   tokens: [

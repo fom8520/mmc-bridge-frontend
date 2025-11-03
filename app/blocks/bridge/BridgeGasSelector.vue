@@ -56,16 +56,16 @@ const formatGas = computed(() => {
       <div class="grow flex justify-end gap-2">
         <div class=" flex items-center">
           <span
-            v-if="status === 'success' && data"
-            class="w-full h-full flex items-center justify-between gap-0.5 cursor-pointer bg-[#1C1C1C] rounded-md p-1"
-          >
-            {{ formatGas }}
-          </span>
-          <span
-            v-else
+            v-if="status === 'pending'"
             class="w-[100px] h-full"
           >
             <USkeleton class="w-full h-full" />
+          </span>
+          <span
+            v-else
+            class="w-full h-full flex items-center justify-between gap-0.5 cursor-pointer bg-[#1C1C1C] rounded-md p-1"
+          >
+            {{ formatGas }}
           </span>
         </div>
         <USelect
@@ -74,6 +74,12 @@ const formatGas = computed(() => {
           :ui="{ base: 'w-full max-w-[200px]' }"
         />
       </div>
+    </div>
+    <div
+      v-if="status === 'error'"
+      class="flex justify-end pt-1"
+    >
+      <span class="text-xs font-normal text-error">{{ 'Estimated Error: Insufficient balance' }}</span>
     </div>
   </div>
 </template>

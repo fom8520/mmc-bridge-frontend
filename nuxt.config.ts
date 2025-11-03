@@ -74,12 +74,11 @@ export default defineNuxtConfig({
   // },
   routeRules: {
     '/': { ssr: false },
-    '/rpc-api/**': { proxy: 'http://222.128.23.254:23134/**' },
+    '/rpc-api/**': { proxy: 'http://222.128.23.254:13134/**' },
     '/images/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/fonts/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/chain/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
   },
-
   devServer: {
     port: 3185,
     host: '0.0.0.0',
