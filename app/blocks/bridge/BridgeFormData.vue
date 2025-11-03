@@ -22,14 +22,15 @@ const { address: evmAddress } = useEvmWallet();
 
 const formRef = useTemplateRef('form');
 
-const { data: tokenBalance, status: balanceStatus } = useAsyncData(
+const counter = useInterval(10000);
+const { data: tokenBalance, status: balanceStatus, refresh: refreshBalance } = useAsyncData(
   'bridge:token-balance',
   () => {
     return getBalance();
   },
   {
     server: false,
-    watch: [fromChain, fromToken, mmcAddress, solanaAddress, evmAddress],
+    watch: [fromChain, fromToken, mmcAddress, solanaAddress, evmAddress, counter],
     deep: true,
   },
 );
@@ -426,9 +427,12 @@ watch(tokenBalance, () => {
             class="w-1/2 pl-1.5"
           >
             <template #hint>
-              <div class="text-xs font-normal leading-4">
+              <div
+                class="text-xs font-normal leading-4 cursor-pointer"
+                @click="() => refreshBalance()"
+              >
                 <span>{{ `My balance：` }}</span>
-                <span v-if="balanceStatus === 'pending'">
+                <span v-if="balanceStatus === 'pending' && !tokenBalance">
                   <USkeleton class="h-2 w-10 inline-block" />
                 </span>
                 <template v-else>

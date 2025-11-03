@@ -4,13 +4,22 @@ import { ethers } from 'ethers';
 const { rpcApi, address } = useMMCWallet();
 const { payGasType, estimatedGas, fromChain, toChain, fromToken } = useBridgeRemote();
 
+const { counter, pause } = useInterval(5000, { controls: true });
 const { data: userAsset, status: userAssetStatus } = useAsyncData('mmc:user-asset', () => {
   if (!address.value) return Promise.resolve(null);
   return rpcApi.getAddressAssets(address.value);
 }, {
-  watch: [address],
+  watch: [() => address.value, counter],
+  deep: true,
+  immediate: true,
   server: false,
 });
+
+watch(userAsset, () => {
+  if (userAsset.value) {
+    pause();
+  }
+}, { deep: true });
 
 const options = computed(() => {
   return userAsset.value?.map((item) => {

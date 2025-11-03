@@ -107,7 +107,7 @@ export class SolanaWalletController {
     } catch (err) {
       if (err instanceof WalletError) {
         if (err instanceof WalletNotReadyError) {
-          window.open(this.provider.url, '_black');
+          window.open(this.provider.url, '_blank');
         }
 
         const name = err.name as keyof typeof errorInfos;
