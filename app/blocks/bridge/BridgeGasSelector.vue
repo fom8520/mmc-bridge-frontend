@@ -38,7 +38,7 @@ watch(userAsset, () => {
   }
 });
 
-const { data, status } = useAsyncData('bridge:mmc-gas', () => {
+const { data, status, error } = useAsyncData('bridge:mmc-gas', () => {
   return estimatedGas();
 }, {
   server: false,
@@ -88,7 +88,7 @@ const formatGas = computed(() => {
       v-if="status === 'error'"
       class="flex justify-end pt-1"
     >
-      <span class="text-xs font-normal text-error">{{ 'Estimated Error: Insufficient balance' }}</span>
+      <span class="text-xs font-normal text-error">{{ error?.message || 'Estimated Error: Insufficient balance' }}</span>
     </div>
   </div>
 </template>

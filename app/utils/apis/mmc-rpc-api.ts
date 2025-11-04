@@ -85,7 +85,7 @@ export class MMCRpcApi extends HttpFetch {
     }, { outputResult: true })) as any;
 
     if (res?.code !== 0) {
-      throw new Error(`Estimated: ${JSON.stringify(res)}`);
+      throw new Error(res.message);
     } else {
       const val = res.txJson
         ? (JSON.parse(res.txJson)
